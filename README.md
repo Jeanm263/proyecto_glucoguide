@@ -1,73 +1,116 @@
-# React + TypeScript + Vite
+# 🩺 GlucosaApp
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Aplicación web para gestión de diabetes tipo 2 con información nutricional y contenido educativo.
 
-Currently, two official plugins are available:
+## Características
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- 🔐 **Autenticación**: Sistema de login y registro de usuarios
+- 🍎 **Búsqueda de Alimentos**: Base de datos con más de 100 alimentos con información nutricional detallada
+- 🚦 **Semáforo Nutricional**: Sistema de clasificación basado en índice glucémico y valor nutricional
+- 📚 **Módulo Educativo**: Contenido interactivo sobre diabetes, nutrición y hábitos saludables
+- 📊 **Información Detallada**: Índice glucémico, carbohidratos, fibra y azúcares
 
-## React Compiler
+## Tecnologías
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- React 19 + TypeScript
+- Vite para desarrollo rápido
+- React Router para navegación
+- CSS-in-JS para estilos
 
-## Expanding the ESLint configuration
+## Estructura del Proyecto
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```
+src/
+├── components/          # Componentes reutilizables
+│   ├── nutrition/       # Componentes de alimentación
+│   └── education/       # Componentes educativos
+├── screens/             # Pantallas principales
+│   ├── auth/            # Autenticación (login y registro)
+│   ├── foods/           # Pantalla de búsqueda de alimentos
+│   └── education/       # Pantalla de contenido educativo
+├── services/            # Servicios API
+├── types/               # Definiciones TypeScript
+├── utils/               # Utilidades y funciones helper
+├── constants/           # Datos y constantes
+└── App.tsx              # Componente principal con rutas
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Desarrollo
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+```bash
+# Instalar dependencias
+npm install
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+# Iniciar servidor de desarrollo
+npm run dev
+
+# Compilar para producción
+npm run build
+
+# Vista previa de producción
+npm run preview
 ```
+
+### 🔐 Credenciales de Prueba
+
+La aplicación viene con un sistema mock para probar sin backend:
+
+**Usuario Demo:**
+- Email: `demo@glucosaapp.com`
+- Contraseña: `demo123`
+
+**Usuario Test:**
+- Email: `test@glucosaapp.com`
+- Contraseña: `test123`
+
+También puedes registrar nuevos usuarios. Los datos se guardan en localStorage.
+
+Ver [CREDENTIALES_DE_PRUEBA.md](CREDENTIALES_DE_PRUEBA.md) para más información.
+
+## Funcionalidades Principales
+
+### Algoritmo Semáforo Nutricional
+
+El sistema clasifica alimentos en tres categorías:
+
+- 🟢 **Verde**: Excelente elección (IG < 55, alta fibra, bajo azúcar)
+- 🟡 **Amarillo**: Consumir con moderación (IG 55-70)
+- 🔴 **Rojo**: Consumir ocasionalmente (IG > 70, alta azúcar)
+
+### Base de Datos de Alimentos
+
+Incluye información sobre:
+- Índice glucémico
+- Carbohidratos
+- Fibra
+- Azúcares
+- Porción recomendada
+- Nombres comunes
+
+### Contenido Educativo
+
+Artículos y recursos interactivos sobre:
+- Diabetes tipo 2
+- Planificación nutricional
+- Índice glucémico
+- Hábitos saludables
+- Ejercicio y salud
+
+## Rutas Disponibles
+
+- `/` - Página de inicio
+- `/login` - Inicio de sesión
+- `/register` - Registro de usuarios
+- `/foods` - Búsqueda de alimentos
+- `/education` - Contenido educativo
+
+## Próximas Características
+
+- 📈 Seguimiento de glucosa
+- 🍽️ Planificación de comidas
+- 📱 Versión móvil (React Native)
+- 🔄 Conexión con API backend
+
+## Licencia
+
+MIT
