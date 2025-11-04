@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import type { EducationContent } from '../../types/education';
 
 interface EducationDetailProps {
@@ -7,6 +7,25 @@ interface EducationDetailProps {
 }
 
 export const EducationDetail: React.FC<EducationDetailProps> = ({ content, onClose }) => {
+  useEffect(() => {
+    // Manejo de escape key
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    document.addEventListener('keydown', handleEscape);
+    // Focus en el modal al abrir
+    const modalContent = document.querySelector('.education-modal-content') as HTMLElement;
+    if (modalContent) {
+      modalContent.focus();
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [onClose]);
   const getTypeIcon = (type: string) => {
     switch (type) {
       case 'article': return '📄';
@@ -35,15 +54,42 @@ export const EducationDetail: React.FC<EducationDetailProps> = ({ content, onClo
     });
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      onClose();
+    }
+  };
+
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="education-modal-content" onClick={(e) => e.stopPropagation()}>
-        <button onClick={onClose} className="modal-close">×</button>
+    <div
+      className="modal-overlay"
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="education-modal-title"
+      onKeyDown={handleKeyDown}
+    >
+      <div
+        className="education-modal-content"
+        onClick={(e) => e.stopPropagation()}
+        tabIndex={-1}
+      >
+        <button
+          onClick={onClose}
+          className="modal-close"
+          aria-label="Cerrar modal"
+        >
+          <span aria-hidden="true">×</span>
+        </button>
 
         <div className="education-modal-header">
-          <span className="education-detail-icon">{getTypeIcon(content.type)}</span>
+          <span className="education-detail-icon" aria-hidden="true">
+            {getTypeIcon(content.type)}
+          </span>
           <div className="education-detail-header-content">
-            <h1 className="education-detail-title">{content.title}</h1>
+            <h1 className="education-detail-title" id="education-modal-title">
+              {content.title}
+            </h1>
             <div className="education-detail-meta">
               <span className="education-detail-duration">⏱️ {content.duration}</span>
               <span 
@@ -103,6 +149,12 @@ export const EducationDetail: React.FC<EducationDetailProps> = ({ content, onClo
           position: relative;
           box-shadow: 0 20px 60px rgba(0,0,0,0.3);
           animation: slideIn 0.3s ease-out;
+          outline: none;
+        }
+
+        .education-modal-content:focus {
+          outline: 3px solid #764ba2;
+          outline-offset: 2px;
         }
 
         .modal-close {

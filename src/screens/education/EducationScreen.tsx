@@ -1,9 +1,13 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { EducationCard } from '../../components/education/EducationCard';
 import { EducationDetail } from '../../components/education/EducationDetail';
 import { EDUCATION_CONTENT, EDUCATION_CATEGORIES } from '../../constants/educationContent';
+import { useDebounce } from '../../hooks/useDebounce';
 import type { EducationContent } from '../../types/education';
+import { educationService } from '../../services/educationService';
+import { USE_MOCK_SERVICE } from '../../config/env';
+import { toastError } from '../../utils/toast';
 
 type EducationLevel = 'basic' | 'intermediate' | 'advanced';
 
@@ -12,16 +16,63 @@ export const EducationScreen: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedLevel, setSelectedLevel] = useState<string>('todos');
   const [selectedContent, setSelectedContent] = useState<EducationContent | null>(null);
+  const [educationContent, setEducationContent] = useState<EducationContent[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Debounce del search query para mejorar performance
+  // Solo ejecuta el filtrado 300ms después de que el usuario deje de escribir
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
+
+  // Cargar contenido educativo al montar el componente
+  useEffect(() => {
+    const fetchEducationContent = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        let content: EducationContent[];
+        
+        if (USE_MOCK_SERVICE) {
+          // Usar datos mock para desarrollo
+          content = EDUCATION_CONTENT;
+        } else {
+          // Obtener datos reales del backend
+          content = await educationService.getAllContent();
+        }
+        
+        setEducationContent(content);
+      } catch (err) {
+        console.error('Error al cargar contenido educativo:', err);
+        setError('No se pudo cargar el contenido educativo. Por favor, inténtalo más tarde.');
+        toastError('No se pudo cargar el contenido educativo');
+        
+        // En caso de error, usar datos mock como fallback
+        setEducationContent(EDUCATION_CONTENT);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEducationContent();
+  }, []);
+
+  // Memoizar el callback para evitar re-crear la función en cada render
+  // Esto permite que React.memo en EducationCard funcione mejor
+  const handleContentPress = useCallback((content: EducationContent) => {
+    setSelectedContent(content);
+  }, []);
 
   const filteredContent = useMemo(() => {
-    let content = EDUCATION_CONTENT;
+    let content = educationContent;
 
     if (selectedLevel !== 'todos') {
       content = content.filter(c => c.level === selectedLevel as EducationLevel);
     }
 
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
+    // Filter by search query (usando el valor debounced)
+    if (debouncedSearchQuery) {
+      const query = debouncedSearchQuery.toLowerCase();
       content = content.filter(c =>
         c.title.toLowerCase().includes(query) ||
         c.tags.some(tag => tag.toLowerCase().includes(query))
@@ -29,69 +80,124 @@ export const EducationScreen: React.FC = () => {
     }
 
     return content;
-  }, [searchQuery, selectedLevel]);
+  }, [educationContent, debouncedSearchQuery, selectedLevel]);
 
   const levels = ['todos', 'basic', 'intermediate', 'advanced'];
+
+  if (loading) {
+    return (
+      <div className="education-page">
+        <div className="loading-container">
+          <div className="spinner"></div>
+          <p>Cargando contenido educativo...</p>
+        </div>
+        <style>{`
+          .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: #f5f7fa;
+          }
+          
+          .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #764ba2;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+          }
+          
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        `}</style>
+      </div>
+    );
+  }
 
   return (
     <div className="education-page">
       {/* Header */}
-      <div className="education-header">
+      <header className="education-header">
         <div className="education-header-content">
-          <button onClick={() => navigate('/home')} className="btn-back">
-            ← Inicio
+          <button
+            onClick={() => navigate('/home')}
+            className="btn-back"
+            aria-label="Volver al inicio"
+          >
+            <span aria-hidden="true">←</span> Inicio
           </button>
-          <h1 className="education-title">📚 Educación en Diabetes</h1>
+          <h1 className="education-title">
+            <span aria-hidden="true">📚</span> Educación en Diabetes
+          </h1>
         </div>
-      </div>
+      </header>
 
       {/* Content */}
       <div className="education-content fade-in">
         {/* Search and Filters */}
-        <div className="search-card">
+        <div className="search-card" role="search">
+          <label htmlFor="education-search-input" className="sr-only">
+            Buscar contenido educativo
+          </label>
           <input
+            id="education-search-input"
             type="text"
-            placeholder="Buscar contenido educativo..."
+            placeholder="Buscar artículos, videos, etc..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="search-input"
+            aria-label="Buscar contenido educativo por título o tags"
           />
 
-          <div className="level-filters">
+          <div className="level-filters" role="group" aria-label="Filtros por nivel">
             {levels.map(level => (
               <button
                 key={level}
                 onClick={() => setSelectedLevel(level)}
                 className={`level-btn ${selectedLevel === level ? 'active' : ''}`}
+                aria-pressed={selectedLevel === level}
               >
-                {level === 'todos' ? 'Todos los niveles' : EDUCATION_CATEGORIES[level as keyof typeof EDUCATION_CATEGORIES]}
+                {level === 'todos' ? 'Todos' : EDUCATION_CATEGORIES[level as keyof typeof EDUCATION_CATEGORIES]}
               </button>
             ))}
           </div>
         </div>
 
-        {/* Results Header */}
+        {/* Error message */}
+        {error && (
+          <div className="error-message" role="alert">
+            <p>{error}</p>
+          </div>
+        )}
+
+        {/* Results */}
         <div className="results-header">
           <h2 className="results-title">
-            Contenido disponible {filteredContent.length > 0 && <span className="results-count">({filteredContent.length})</span>}
+            Resultados <span className="results-count">({filteredContent.length})</span>
           </h2>
         </div>
 
-        {/* Results */}
         {filteredContent.length === 0 ? (
-          <div className="empty-state">
-            <div className="empty-icon">📖</div>
+          <div className="empty-state" role="status" aria-live="polite">
+            <div className="empty-icon" aria-hidden="true">📖</div>
             <p className="empty-message">No se encontró contenido con esos criterios</p>
             <p className="empty-hint">Intenta con otros términos de búsqueda</p>
           </div>
         ) : (
-          <div className="education-list">
+          <div className="education-list" role="list" aria-labelledby="education-results-heading">
             {filteredContent.map(content => (
-              <EducationCard
-                key={content.id}
-                content={content}
-                onPress={() => setSelectedContent(content)}
-              />
+              <div key={content.id} role="listitem">
+                <EducationCard
+                  content={content}
+                  onPress={() => handleContentPress(content)}
+                />
+              </div>
             ))}
           </div>
         )}
@@ -216,6 +322,23 @@ export const EducationScreen: React.FC = () => {
           box-shadow: 0 4px 12px rgba(118, 75, 162, 0.3);
         }
 
+        .level-btn:focus {
+          outline: 3px solid #764ba2;
+          outline-offset: 2px;
+        }
+
+        .sr-only {
+          position: absolute;
+          width: 1px;
+          height: 1px;
+          padding: 0;
+          margin: -1px;
+          overflow: hidden;
+          clip: rect(0, 0, 0, 0);
+          white-space: nowrap;
+          border-width: 0;
+        }
+
         .results-header {
           margin-bottom: 24px;
         }
@@ -263,6 +386,15 @@ export const EducationScreen: React.FC = () => {
           font-size: 16px;
           color: #999;
           margin: 0;
+        }
+
+        .error-message {
+          background: #f8d7da;
+          border: 1px solid #f5c6cb;
+          color: #721c24;
+          padding: 12px 16px;
+          border-radius: 8px;
+          margin-bottom: 20px;
         }
 
         @media (max-width: 768px) {

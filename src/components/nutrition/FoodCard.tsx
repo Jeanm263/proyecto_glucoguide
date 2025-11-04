@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import type { FoodItem } from '../../types/food';
 import { getTrafficLightColor } from '../../utils/trafficLightCalculator';
 
@@ -7,15 +7,48 @@ interface FoodCardProps {
   onPress: () => void;
 }
 
-export const FoodCard: React.FC<FoodCardProps> = ({ food, onPress }) => {
+/**
+ * Componente de tarjeta de alimento optimizado con React.memo
+ * Solo se re-renderiza si cambian las props (food o onPress)
+ */
+const FoodCardComponent: React.FC<FoodCardProps> = ({ food, onPress }) => {
   const trafficLightColor = getTrafficLightColor(food.trafficLight);
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      onPress();
+    }
+  };
+
+  const getTrafficLightLabel = (color: 'green' | 'yellow' | 'red') => {
+    switch (color) {
+      case 'green': return 'Excelente elección';
+      case 'yellow': return 'Consumir con moderación';
+      case 'red': return 'Consumir ocasionalmente';
+    }
+  };
+
   return (
-    <div className="food-card" onClick={onPress}>
+    <div
+      className="food-card"
+      onClick={onPress}
+      onKeyDown={handleKeyDown}
+      role="button"
+      tabIndex={0}
+      aria-label={`Ver detalles de ${food.name}`}
+    >
       <div className="food-card-header">
-        <div className="traffic-light-indicator" style={{ backgroundColor: trafficLightColor }} />
+        <div
+          className="traffic-light-indicator"
+          style={{ backgroundColor: trafficLightColor }}
+          role="img"
+          aria-label={getTrafficLightLabel(food.trafficLight)}
+        />
         <h3 className="food-name">{food.name}</h3>
-        <span className="food-category">{food.category}</span>
+        <span className="food-category" aria-label={`Categoría: ${food.category}`}>
+          {food.category}
+        </span>
       </div>
       
       <p className="food-portion">{food.portion}</p>
@@ -44,6 +77,18 @@ export const FoodCard: React.FC<FoodCardProps> = ({ food, onPress }) => {
           border: 1px solid #f0f0f0;
           position: relative;
           overflow: hidden;
+          outline: none;
+        }
+
+        .food-card:focus {
+          outline: 3px solid #667eea;
+          outline-offset: 2px;
+          box-shadow: 0 2px 12px rgba(0,0,0,0.08), 0 0 0 3px rgba(102, 126, 234, 0.3);
+        }
+
+        .food-card:focus-visible {
+          outline: 3px solid #667eea;
+          outline-offset: 2px;
         }
 
         .food-card::before {
@@ -128,3 +173,19 @@ export const FoodCard: React.FC<FoodCardProps> = ({ food, onPress }) => {
     </div>
   );
 };
+
+// Memoizar el componente para evitar re-renders innecesarios
+// Solo se re-renderiza si food o onPress cambian
+export const FoodCard = memo(FoodCardComponent, (prevProps, nextProps) => {
+  // Comparación personalizada: solo re-renderizar si el food cambió
+  // o si onPress cambió (comparación por referencia)
+  return (
+    prevProps.food.id === nextProps.food.id &&
+    prevProps.food.name === nextProps.food.name &&
+    prevProps.food.trafficLight === nextProps.food.trafficLight &&
+    prevProps.food.glycemicIndex === nextProps.food.glycemicIndex &&
+    prevProps.food.carbohydrates === nextProps.food.carbohydrates &&
+    prevProps.food.fiber === nextProps.food.fiber &&
+    prevProps.onPress === nextProps.onPress
+  );
+});

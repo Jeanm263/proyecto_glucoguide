@@ -1,14 +1,5 @@
 import apiClient from './api';
-import { mockAuthService } from './mockAuthService';
-
-/**
- * Servicio de autenticación
- * En desarrollo: usa mockAuthService (sin backend)
- * En producción: conectar con endpoints reales del backend
- */
-
-// Cambiar a false cuando el backend esté disponible
-const USE_MOCK_SERVICE = true;
+import { USE_MOCK_SERVICE } from '../config/env';
 
 export interface LoginCredentials {
   email: string;
@@ -19,15 +10,21 @@ export interface RegisterData {
   email: string;
   password: string;
   name: string;
+  age?: number;
+  diabetesType?: string;
+}
+
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  age?: number;
+  diabetesType?: string;
 }
 
 export interface AuthResponse {
   token: string;
-  user: {
-    id: string;
-    name: string;
-    email: string;
-  };
+  user: User;
 }
 
 export const authService = {
@@ -36,17 +33,21 @@ export const authService = {
    */
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
     if (USE_MOCK_SERVICE) {
-      return mockAuthService.login(credentials);
+      // Implementación mock para desarrollo
+      await new Promise(resolve => setTimeout(resolve, 500));
+      throw new Error('Mock service no implementado');
     }
     
     try {
       const response = await apiClient.post('/auth/login', credentials);
-      const { token, user } = response.data;
+      const { user } = response.data;
       
-      // Guardar token en localStorage
-      localStorage.setItem('authToken', token);
+      // El token se maneja con cookies, no es necesario guardarlo
       
-      return { token, user };
+      return { 
+        token: '', // El token se maneja con cookies
+        user 
+      };
     } catch (error) {
       console.error('Error logging in:', error);
       throw error;
@@ -58,17 +59,21 @@ export const authService = {
    */
   async register(data: RegisterData): Promise<AuthResponse> {
     if (USE_MOCK_SERVICE) {
-      return mockAuthService.register(data);
+      // Implementación mock para desarrollo
+      await new Promise(resolve => setTimeout(resolve, 500));
+      throw new Error('Mock service no implementado');
     }
     
     try {
       const response = await apiClient.post('/auth/register', data);
-      const { token, user } = response.data;
+      const { user } = response.data;
       
-      // Guardar token en localStorage
-      localStorage.setItem('authToken', token);
+      // El token se maneja con cookies, no es necesario guardarlo
       
-      return { token, user };
+      return { 
+        token: '', // El token se maneja con cookies
+        user 
+      };
     } catch (error) {
       console.error('Error registering:', error);
       throw error;
@@ -79,21 +84,24 @@ export const authService = {
    * Cerrar sesión
    */
   logout(): void {
-    localStorage.removeItem('authToken');
+    // En el caso de cookies, podríamos hacer una llamada al backend
+    // para eliminar la cookie de sesión
     window.location.href = '/';
   },
 
   /**
    * Obtener usuario actual
    */
-  async getCurrentUser() {
+  async getCurrentUser(): Promise<User> {
     if (USE_MOCK_SERVICE) {
-      return mockAuthService.getCurrentUser();
+      // Implementación mock para desarrollo
+      await new Promise(resolve => setTimeout(resolve, 200));
+      throw new Error('Mock service no implementado');
     }
     
     try {
       const response = await apiClient.get('/auth/me');
-      return response.data;
+      return response.data.user;
     } catch (error) {
       console.error('Error getting current user:', error);
       throw error;
@@ -103,11 +111,21 @@ export const authService = {
   /**
    * Verificar si hay un token válido
    */
-  isAuthenticated(): boolean {
+  async isAuthenticated(): Promise<boolean> {
     if (USE_MOCK_SERVICE) {
-      return mockAuthService.isAuthenticated();
+      // Para desarrollo, asumimos que no estamos autenticados
+      return false;
     }
-    return !!localStorage.getItem('authToken');
+    
+    try {
+      // Verificar autenticación consultando el endpoint protegido
+      await apiClient.get('/auth/me');
+      return true;
+    } catch (error: unknown) {
+      // Si hay un error, asumimos que no estamos autenticados
+      console.error('Authentication check failed:', error);
+      return false;
+    }
   },
 
   /**
@@ -117,4 +135,3 @@ export const authService = {
     return localStorage.getItem('authToken');
   }
 };
-

@@ -1,5 +1,6 @@
 import apiClient from './api';
 import type { EducationContent } from '../types/education';
+import { transformBackendData, transformBackendDataArray } from '../utils/dataTransform';
 
 /**
  * Servicio para obtener contenido educativo desde el backend
@@ -15,7 +16,10 @@ export const educationService = {
       const response = await apiClient.get('/education', {
         params: level ? { level } : {}
       });
-      return response.data;
+      // Ajustar la estructura de la respuesta del backend
+      const data = response.data.data || response.data;
+      // Transformar los datos para asegurar que tengan el campo 'id'
+      return Array.isArray(data) ? transformBackendDataArray(data) : [];
     } catch (error) {
       console.error('Error fetching education content:', error);
       throw error;
@@ -30,7 +34,10 @@ export const educationService = {
       const response = await apiClient.get('/education/search', {
         params: { q: query }
       });
-      return response.data;
+      // Ajustar la estructura de la respuesta del backend
+      const data = response.data.data || response.data;
+      // Transformar los datos para asegurar que tengan el campo 'id'
+      return Array.isArray(data) ? transformBackendDataArray(data) : [];
     } catch (error) {
       console.error('Error searching education content:', error);
       throw error;
@@ -43,7 +50,10 @@ export const educationService = {
   async getContentById(id: string): Promise<EducationContent> {
     try {
       const response = await apiClient.get(`/education/${id}`);
-      return response.data;
+      // Ajustar la estructura de la respuesta del backend
+      const data = response.data.data || response.data;
+      // Transformar los datos para asegurar que tengan el campo 'id'
+      return transformBackendData(data);
     } catch (error) {
       console.error('Error fetching education content:', error);
       throw error;
@@ -58,7 +68,10 @@ export const educationService = {
       const response = await apiClient.get('/education/tags', {
         params: { tags: tags.join(',') }
       });
-      return response.data;
+      // Ajustar la estructura de la respuesta del backend
+      const data = response.data.data || response.data;
+      // Transformar los datos para asegurar que tengan el campo 'id'
+      return Array.isArray(data) ? transformBackendDataArray(data) : [];
     } catch (error) {
       console.error('Error fetching content by tags:', error);
       throw error;
@@ -71,7 +84,10 @@ export const educationService = {
   async createContent(content: Omit<EducationContent, 'id'>): Promise<EducationContent> {
     try {
       const response = await apiClient.post('/education', content);
-      return response.data;
+      // Ajustar la estructura de la respuesta del backend
+      const data = response.data.data || response.data;
+      // Transformar los datos para asegurar que tengan el campo 'id'
+      return transformBackendData(data);
     } catch (error) {
       console.error('Error creating education content:', error);
       throw error;
@@ -84,7 +100,10 @@ export const educationService = {
   async updateContent(id: string, content: Partial<EducationContent>): Promise<EducationContent> {
     try {
       const response = await apiClient.put(`/education/${id}`, content);
-      return response.data;
+      // Ajustar la estructura de la respuesta del backend
+      const data = response.data.data || response.data;
+      // Transformar los datos para asegurar que tengan el campo 'id'
+      return transformBackendData(data);
     } catch (error) {
       console.error('Error updating education content:', error);
       throw error;
@@ -103,4 +122,3 @@ export const educationService = {
     }
   }
 };
-

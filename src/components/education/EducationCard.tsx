@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import type { EducationContent } from '../../types/education';
 
 interface EducationCardProps {
@@ -6,7 +6,11 @@ interface EducationCardProps {
   onPress: () => void;
 }
 
-export const EducationCard: React.FC<EducationCardProps> = ({ content, onPress }) => {
+/**
+ * Componente de tarjeta de contenido educativo optimizado con React.memo
+ * Solo se re-renderiza si cambian las props (content o onPress)
+ */
+const EducationCardComponent: React.FC<EducationCardProps> = ({ content, onPress }) => {
   const getTypeIcon = (type: string) => {
     switch (type) {
       case 'article': return '📄';
@@ -25,8 +29,22 @@ export const EducationCard: React.FC<EducationCardProps> = ({ content, onPress }
     }
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      onPress();
+    }
+  };
+
   return (
-    <div className="education-card" onClick={onPress}>
+    <div
+      className="education-card"
+      onClick={onPress}
+      onKeyDown={handleKeyDown}
+      role="button"
+      tabIndex={0}
+      aria-label={`Abrir artículo: ${content.title}`}
+    >
       <div className="education-card-content">
         <div className="education-icon">{getTypeIcon(content.type)}</div>
         
@@ -70,6 +88,18 @@ export const EducationCard: React.FC<EducationCardProps> = ({ content, onPress }
           border: 1px solid #f0f0f0;
           position: relative;
           overflow: hidden;
+          outline: none;
+        }
+
+        .education-card:focus {
+          outline: 3px solid #764ba2;
+          outline-offset: 2px;
+          box-shadow: 0 2px 12px rgba(0,0,0,0.08), 0 0 0 3px rgba(118, 75, 162, 0.3);
+        }
+
+        .education-card:focus-visible {
+          outline: 3px solid #764ba2;
+          outline-offset: 2px;
         }
 
         .education-card::before {
@@ -164,3 +194,18 @@ export const EducationCard: React.FC<EducationCardProps> = ({ content, onPress }
     </div>
   );
 };
+
+// Memoizar el componente para evitar re-renders innecesarios
+// Solo se re-renderiza si content o onPress cambian
+export const EducationCard = memo(EducationCardComponent, (prevProps, nextProps) => {
+  // Comparación personalizada: solo re-renderizar si el content cambió
+  // o si onPress cambió (comparación por referencia)
+  return (
+    prevProps.content.id === nextProps.content.id &&
+    prevProps.content.title === nextProps.content.title &&
+    prevProps.content.level === nextProps.content.level &&
+    prevProps.content.type === nextProps.content.type &&
+    prevProps.content.duration === nextProps.content.duration &&
+    prevProps.onPress === nextProps.onPress
+  );
+});

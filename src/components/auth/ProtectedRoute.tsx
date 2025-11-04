@@ -1,5 +1,6 @@
 import { Navigate } from 'react-router-dom';
-import { authService } from '../../services/authService';
+import { useAuth } from '../../contexts/AuthContext';
+import { LoadingScreen } from '../common/LoadingScreen';
 
 interface ProtectedRouteProps {
   children: React.ReactElement;
@@ -10,7 +11,11 @@ interface ProtectedRouteProps {
  * Redirige a login si el usuario no está autenticado
  */
 export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-  const isAuthenticated = authService.isAuthenticated();
+  const { isAuthenticated, isLoading } = useAuth();
+
+  if (isLoading) {
+    return <LoadingScreen />;
+  }
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;

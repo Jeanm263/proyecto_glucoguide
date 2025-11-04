@@ -1,8 +1,9 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FoodCard } from '../../components/nutrition/FoodCard';
 import { FoodDetails } from '../../components/nutrition/FoodDetails';
 import { INITIAL_FOODS, FOOD_CATEGORIES } from '../../constants/foodsData';
+import { useDebounce } from '../../hooks/useDebounce';
 import type { FoodItem } from '../../types/food';
 
 export const FoodSearchScreen: React.FC = () => {
@@ -10,6 +11,16 @@ export const FoodSearchScreen: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('todas');
   const [selectedFood, setSelectedFood] = useState<FoodItem | null>(null);
+
+  // Debounce del search query para mejorar performance
+  // Solo ejecuta el filtrado 300ms después de que el usuario deje de escribir
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
+
+  // Memoizar el callback para evitar re-crear la función en cada render
+  // Esto permite que React.memo en FoodCard funcione correctamente
+  const handleFoodPress = useCallback((food: FoodItem) => {
+    setSelectedFood(food);
+  }, []);
 
   const filteredFoods = useMemo(() => {
     let foods = INITIAL_FOODS;
@@ -19,9 +30,9 @@ export const FoodSearchScreen: React.FC = () => {
       foods = foods.filter(food => food.category === selectedCategory);
     }
 
-    // Filter by search query
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
+    // Filter by search query (usando el valor debounced)
+    if (debouncedSearchQuery) {
+      const query = debouncedSearchQuery.toLowerCase();
       foods = foods.filter(food =>
         food.name.toLowerCase().includes(query) ||
         food.commonNames.some(name => name.toLowerCase().includes(query))
@@ -29,38 +40,55 @@ export const FoodSearchScreen: React.FC = () => {
     }
 
     return foods;
-  }, [searchQuery, selectedCategory]);
+  }, [debouncedSearchQuery, selectedCategory]);
 
   return (
     <div className="foods-page">
       {/* Header */}
-      <div className="foods-header">
+      <header className="foods-header">
         <div className="foods-header-content">
-          <button onClick={() => navigate('/home')} className="btn-back">
-            ← Inicio
+          <button
+            onClick={() => navigate('/home')}
+            className="btn-back"
+            aria-label="Volver al inicio"
+          >
+            <span aria-hidden="true">←</span> Inicio
           </button>
-          <h1 className="foods-title">🍎 Buscar Alimentos</h1>
+          <h1 className="foods-title">
+            <span aria-hidden="true">🍎</span> Buscar Alimentos
+          </h1>
         </div>
-      </div>
+      </header>
 
       {/* Content */}
       <div className="foods-content fade-in">
         {/* Search and Filters */}
-        <div className="search-card">
+        <div className="search-card" role="search">
+          <label htmlFor="food-search-input" className="sr-only">
+            Buscar alimentos
+          </label>
           <input
+            id="food-search-input"
             type="text"
             placeholder="Buscar alimentos... (ej: manzana, arroz, pan)"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="search-input"
+            aria-label="Buscar alimentos por nombre"
+            aria-describedby="food-search-hint"
           />
+          <span id="food-search-hint" className="sr-only">
+            Escribe el nombre del alimento que deseas buscar
+          </span>
 
-          <div className="category-filters">
+          <div className="category-filters" role="group" aria-label="Filtros por categoría">
             {FOOD_CATEGORIES.map(category => (
               <button
                 key={category}
                 onClick={() => setSelectedCategory(category)}
                 className={`category-btn ${selectedCategory === category ? 'active' : ''}`}
+                aria-pressed={selectedCategory === category}
+                aria-label={`Filtrar por categoría: ${category}`}
               >
                 {category}
               </button>
@@ -70,8 +98,13 @@ export const FoodSearchScreen: React.FC = () => {
 
         {/* Results Header */}
         <div className="results-header">
-          <h2 className="results-title">
-            Resultados {filteredFoods.length > 0 && <span className="results-count">({filteredFoods.length})</span>}
+          <h2 className="results-title" id="results-heading">
+            Resultados{' '}
+            {filteredFoods.length > 0 && (
+              <span className="results-count" aria-label={`${filteredFoods.length} alimentos encontrados`}>
+                ({filteredFoods.length})
+              </span>
+            )}
           </h2>
         </div>
 
@@ -83,13 +116,14 @@ export const FoodSearchScreen: React.FC = () => {
             <p className="empty-hint">Intenta con otros términos o cambia la categoría</p>
           </div>
         ) : (
-          <div className="foods-grid">
+          <div className="foods-grid" role="list" aria-labelledby="results-heading">
             {filteredFoods.map(food => (
-              <FoodCard
-                key={food.id}
-                food={food}
-                onPress={() => setSelectedFood(food)}
-              />
+              <div key={food.id} role="listitem">
+                <FoodCard
+                  food={food}
+                  onPress={() => handleFoodPress(food)}
+                />
+              </div>
             ))}
           </div>
         )}
@@ -214,6 +248,11 @@ export const FoodSearchScreen: React.FC = () => {
           box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
         }
 
+        .category-btn:focus {
+          outline: 3px solid #667eea;
+          outline-offset: 2px;
+        }
+
         .results-header {
           margin-bottom: 24px;
         }
@@ -234,6 +273,18 @@ export const FoodSearchScreen: React.FC = () => {
           display: grid;
           grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
           gap: 24px;
+        }
+
+        .sr-only {
+          position: absolute;
+          width: 1px;
+          height: 1px;
+          padding: 0;
+          margin: -1px;
+          overflow: hidden;
+          clip: rect(0, 0, 0, 0);
+          white-space: nowrap;
+          border-width: 0;
         }
 
         .empty-state {

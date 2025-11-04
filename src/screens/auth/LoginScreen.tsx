@@ -1,37 +1,30 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useNavigate, Link } from 'react-router-dom';
-import { authService } from '../../services/authService';
+import { useAuth } from '../../contexts/AuthContext';
+import { loginSchema, type LoginFormData } from '../../schemas/authSchemas';
 
 export const LoginScreen: React.FC = () => {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    email: '',
-    password: ''
+  const { login, isLoading } = useAuth();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+    mode: 'onBlur', // Validar al perder el foco
   });
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
-
+  const onSubmit = async (data: LoginFormData) => {
     try {
-      await authService.login(formData);
+      await login(data);
       navigate('/home');
     } catch (err) {
-      setError('Credenciales inválidas. Por favor intenta de nuevo.');
+      // El error ya se maneja en el contexto con toast
       console.error('Login error:', err);
-    } finally {
-      setLoading(false);
     }
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
   };
 
   return (
@@ -45,45 +38,49 @@ export const LoginScreen: React.FC = () => {
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="auth-form">
+        <form onSubmit={handleSubmit(onSubmit)} className="auth-form">
           <div className="form-group">
-            <label className="form-label">Email</label>
+            <label htmlFor="email-input" className="form-label">Email</label>
             <input
+              id="email-input"
               type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              required
               placeholder="tu@email.com"
-              className="form-input"
+              className={`form-input ${errors.email ? 'form-input-error' : ''}`}
+              aria-invalid={!!errors.email}
+              aria-describedby={errors.email ? 'email-error' : undefined}
+              {...register('email')}
             />
+            {errors.email && (
+              <span id="email-error" className="form-error" role="alert">
+                {errors.email.message}
+              </span>
+            )}
           </div>
 
           <div className="form-group">
-            <label className="form-label">Contraseña</label>
+            <label htmlFor="password-input" className="form-label">Contraseña</label>
             <input
+              id="password-input"
               type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              required
               placeholder="••••••••"
-              className="form-input"
+              className={`form-input ${errors.password ? 'form-input-error' : ''}`}
+              aria-invalid={!!errors.password}
+              aria-describedby={errors.password ? 'password-error' : undefined}
+              {...register('password')}
             />
+            {errors.password && (
+              <span id="password-error" className="form-error" role="alert">
+                {errors.password.message}
+              </span>
+            )}
           </div>
-
-          {error && (
-            <div className="error-message">
-              <span>⚠️</span> {error}
-            </div>
-          )}
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={isSubmitting || isLoading}
             className="btn btn-primary btn-full"
           >
-            {loading ? (
+            {isSubmitting || isLoading ? (
               <>
                 <span className="loading-spinner" style={{ width: '20px', height: '20px', borderWidth: '2px' }} />
                 Iniciando sesión...
@@ -209,17 +206,22 @@ export const LoginScreen: React.FC = () => {
           box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
         }
 
-        .error-message {
-          padding: 12px 16px;
-          background: linear-gradient(135deg, #fee 0%, #fcc 100%);
-          border: 1px solid #fcc;
-          border-radius: 12px;
-          color: #c33;
-          font-size: 14px;
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          animation: slideIn 0.3s ease-out;
+        .form-input-error {
+          border-color: #f44336 !important;
+          background: #fff5f5 !important;
+        }
+
+        .form-input-error:focus {
+          box-shadow: 0 0 0 4px rgba(244, 67, 54, 0.1) !important;
+        }
+
+        .form-error {
+          display: block;
+          margin-top: 6px;
+          font-size: 13px;
+          color: #f44336;
+          font-weight: 500;
+          animation: slideIn 0.2s ease-out;
         }
 
         .btn {

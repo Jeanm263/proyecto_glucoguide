@@ -1,12 +1,15 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { authService } from '../services/authService';
+import { useAuth } from '../contexts/AuthContext';
+import { toastInfo } from '../utils/toast';
 
 export const HomeScreen: React.FC = () => {
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
 
   const handleLogout = () => {
-    authService.logout();
+    toastInfo('Cerrando sesión...');
+    logout();
     navigate('/login');
   };
 
@@ -14,41 +17,71 @@ export const HomeScreen: React.FC = () => {
     <div className="home-container">
       <div className="home-content fade-in">
         {/* Header */}
-        <div className="home-header">
-          <button onClick={handleLogout} className="btn-logout">
-            <span>👤</span> Cerrar Sesión
+        <header className="home-header">
+          <button
+            onClick={handleLogout}
+            className="btn-logout"
+            aria-label="Cerrar sesión"
+          >
+            <span aria-hidden="true">👤</span> Cerrar Sesión
           </button>
-        </div>
+        </header>
 
         {/* Hero Section */}
         <div className="hero-section slide-in">
           <div className="hero-icon">🩺</div>
           <h1 className="hero-title">GlucosaApp</h1>
+          {user && (
+            <p className="hero-greeting">
+              ¡Hola, {user.name}! 👋
+            </p>
+          )}
           <p className="hero-subtitle">
             Tu guía inteligente para gestionar la diabetes tipo 2 con información nutricional y educación
           </p>
         </div>
 
         {/* Main Cards */}
-        <div className="cards-grid">
-          <div className="feature-card card-hover" onClick={() => navigate('/foods')}>
-            <div className="card-icon">🍎</div>
+        <nav className="cards-grid" aria-label="Navegación principal">
+          <button
+            className="feature-card card-hover"
+            onClick={() => navigate('/foods')}
+            aria-label="Buscar alimentos y ver información nutricional"
+          >
+            <div className="card-icon" aria-hidden="true">🍎</div>
             <h2 className="card-title">Buscar Alimentos</h2>
             <p className="card-description">
               Consulta el valor nutricional, índice glucémico y recomendaciones para más de 100 alimentos
             </p>
-            <div className="card-arrow">→</div>
-          </div>
+            <div className="card-arrow" aria-hidden="true">→</div>
+          </button>
 
-          <div className="feature-card card-hover" onClick={() => navigate('/education')}>
-            <div className="card-icon">📚</div>
+          <button
+            className="feature-card card-hover"
+            onClick={() => navigate('/food-tracking')}
+            aria-label="Registrar y seguir alimentos consumidos"
+          >
+            <div className="card-icon" aria-hidden="true">📝</div>
+            <h2 className="card-title">Seguimiento de Alimentos</h2>
+            <p className="card-description">
+              Registra tus comidas y sigue tu consumo diario de carbohidratos y fibra
+            </p>
+            <div className="card-arrow" aria-hidden="true">→</div>
+          </button>
+
+          <button
+            className="feature-card card-hover"
+            onClick={() => navigate('/education')}
+            aria-label="Acceder a contenido educativo sobre diabetes"
+          >
+            <div className="card-icon" aria-hidden="true">📚</div>
             <h2 className="card-title">Educación</h2>
             <p className="card-description">
               Aprende sobre diabetes, nutrición y hábitos saludables con contenido interactivo
             </p>
-            <div className="card-arrow">→</div>
-          </div>
-        </div>
+            <div className="card-arrow" aria-hidden="true">→</div>
+          </button>
+        </nav>
 
         {/* How it Works Section */}
         <div className="how-it-works">
@@ -160,6 +193,14 @@ export const HomeScreen: React.FC = () => {
           animation: fadeIn 1.2s ease-out;
         }
 
+        .hero-greeting {
+          font-size: 22px;
+          color: rgba(255, 255, 255, 0.98);
+          margin: 8px 0 16px 0;
+          font-weight: 600;
+          animation: fadeIn 1.3s ease-out;
+        }
+
         .hero-subtitle {
           font-size: 20px;
           color: rgba(255, 255, 255, 0.95);
@@ -186,6 +227,21 @@ export const HomeScreen: React.FC = () => {
           overflow: hidden;
           transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
           border: 1px solid rgba(255, 255, 255, 0.3);
+          outline: none;
+          text-align: left;
+          width: 100%;
+          font-family: inherit;
+        }
+
+        .feature-card:focus {
+          outline: 3px solid rgba(255, 255, 255, 0.8);
+          outline-offset: 3px;
+          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2), 0 0 0 3px rgba(102, 126, 234, 0.5);
+        }
+
+        .feature-card:focus-visible {
+          outline: 3px solid rgba(255, 255, 255, 0.9);
+          outline-offset: 3px;
         }
 
         .feature-card::before {

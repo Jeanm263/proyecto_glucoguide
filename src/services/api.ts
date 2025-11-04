@@ -1,8 +1,9 @@
 import axios from 'axios';
+import { API_URL } from '../config/env';
 
 // Configuración base de la API
-// TODO: Reemplazar con la URL real del backend
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+// Usa la URL validada desde el config
+const API_BASE_URL = API_URL;
 
 // Crear instancia de axios con configuración base
 const apiClient = axios.create({
@@ -11,15 +12,13 @@ const apiClient = axios.create({
     'Content-Type': 'application/json',
   },
   timeout: 10000,
+  withCredentials: true, // Importante para manejar cookies
 });
 
 // Interceptor para agregar token de autenticación si existe
+// No es necesario ya que usamos cookies para la autenticación
 apiClient.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('authToken');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
     return config;
   },
   (error) => {
@@ -31,11 +30,46 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      // Manejar sesión expirada
-      localStorage.removeItem('authToken');
-      window.location.href = '/login';
+    // Manejar diferentes tipos de errores
+    if (error.response) {
+      // El servidor respondió con un código de error
+      const status = error.response.status;
+      
+      switch (status) {
+        case 401:
+          // No autorizado - sesión expirada
+          localStorage.removeItem('authToken');
+          window.location.href = '/login';
+          break;
+        case 403:
+          // Prohibido
+          console.error('Acceso prohibido:', error.response.data);
+          break;
+        case 404:
+          // No encontrado
+          console.error('Recurso no encontrado:', error.response.data);
+          break;
+        case 422:
+          // Validación fallida
+          console.error('Error de validación:', error.response.data);
+          break;
+        case 500:
+        case 502:
+        case 503:
+          // Error del servidor
+          console.error('Error del servidor:', error.response.data);
+          break;
+        default:
+          console.error('Error en la respuesta:', error.response.data);
+      }
+    } else if (error.request) {
+      // La petición se hizo pero no hubo respuesta
+      console.error('Sin respuesta del servidor. Verifica tu conexión a internet.');
+    } else {
+      // Algo pasó al configurar la petición
+      console.error('Error al configurar la petición:', error.message);
     }
+    
     return Promise.reject(error);
   }
 );

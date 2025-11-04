@@ -1,115 +1,114 @@
-# 🩺 GlucosaApp
+# GlucosaApp - Frontend
 
-Aplicación web para gestión de diabetes tipo 2 con información nutricional y contenido educativo.
+Aplicación web para el acompañamiento nutricional y educativo de personas con diabetes tipo II.
 
 ## Características
 
-- 🔐 **Autenticación**: Sistema de login y registro de usuarios
-- 🍎 **Búsqueda de Alimentos**: Base de datos con más de 100 alimentos con información nutricional detallada
-- 🚦 **Semáforo Nutricional**: Sistema de clasificación basado en índice glucémico y valor nutricional
-- 📚 **Módulo Educativo**: Contenido interactivo sobre diabetes, nutrición y hábitos saludables
-- 📊 **Información Detallada**: Índice glucémico, carbohidratos, fibra y azúcares
+- ✅ Autenticación de usuarios (registro e inicio de sesión)
+- ✅ Búsqueda y consulta de alimentos con información nutricional
+- ✅ Seguimiento de alimentos consumidos
+- ✅ Planificación de comidas
+- ✅ Contenido educativo sobre diabetes
+- ✅ Registro de síntomas
+- ✅ Sistema de notificaciones
 
 ## Tecnologías
 
-- React 19 + TypeScript
-- Vite para desarrollo rápido
+- React 18 con TypeScript
+- Vite como bundler
 - React Router para navegación
+- React Hook Form para formularios
+- Zod para validación
+- Axios para llamadas API
+- React Hot Toast para notificaciones
 - CSS-in-JS para estilos
 
-## Estructura del Proyecto
-
-```
-src/
-├── components/          # Componentes reutilizables
-│   ├── nutrition/       # Componentes de alimentación
-│   └── education/       # Componentes educativos
-├── screens/             # Pantallas principales
-│   ├── auth/            # Autenticación (login y registro)
-│   ├── foods/           # Pantalla de búsqueda de alimentos
-│   └── education/       # Pantalla de contenido educativo
-├── services/            # Servicios API
-├── types/               # Definiciones TypeScript
-├── utils/               # Utilidades y funciones helper
-├── constants/           # Datos y constantes
-└── App.tsx              # Componente principal con rutas
-```
-
-## Desarrollo
+## Instalación
 
 ```bash
+# Clonar el repositorio
+git clone <url-del-repositorio>
+
 # Instalar dependencias
 npm install
 
+# Crear archivo .env basado en env.example
+cp env.example .env
+
 # Iniciar servidor de desarrollo
 npm run dev
-
-# Compilar para producción
-npm run build
-
-# Vista previa de producción
-npm run preview
 ```
 
-### 🔐 Credenciales de Prueba
+## Scripts disponibles
 
-La aplicación viene con un sistema mock para probar sin backend:
+- `npm run dev` - Inicia el servidor de desarrollo
+- `npm run build` - Compila la aplicación para producción
+- `npm run lint` - Ejecuta el linter
+- `npm run preview` - Vista previa de la compilación de producción
+- `npm run test` - Ejecuta las pruebas unitarias
+- `npm run test:watch` - Ejecuta las pruebas en modo watch
 
-**Usuario Demo:**
-- Email: `demo@glucosaapp.com`
-- Contraseña: `demo123`
+## Estructura del proyecto
 
-**Usuario Test:**
-- Email: `test@glucosaapp.com`
-- Contraseña: `test123`
+```
+src/
+├── components/     # Componentes reutilizables
+├── screens/        # Pantallas principales de la aplicación
+├── services/       # Servicios para comunicación con el backend
+├── contexts/       # Contextos de React
+├── hooks/          # Hooks personalizados
+├── utils/          # Utilidades y funciones auxiliares
+├── types/          # Definiciones de tipos TypeScript
+├── constants/      # Constantes de la aplicación
+├── schemas/        # Esquemas de validación
+├── assets/         # Recursos estáticos
+├── config/         # Configuración de la aplicación
+└── App.tsx         # Componente principal
+```
 
-También puedes registrar nuevos usuarios. Los datos se guardan en localStorage.
+## Variables de entorno
 
-Ver [CREDENTIALES_DE_PRUEBA.md](CREDENTIALES_DE_PRUEBA.md) para más información.
+El archivo `.env` debe contener:
 
-## Funcionalidades Principales
+```
+# URL del API Backend
+VITE_API_URL=http://localhost:4000/api
 
-### Algoritmo Semáforo Nutricional
+# Usar servicio mock o backend real
+# true = usar mock (para desarrollo sin backend)
+# false = usar backend real (cuando el backend esté disponible)
+VITE_USE_MOCK_SERVICE=false
+```
 
-El sistema clasifica alimentos en tres categorías:
+## Pruebas
 
-- 🟢 **Verde**: Excelente elección (IG < 55, alta fibra, bajo azúcar)
-- 🟡 **Amarillo**: Consumir con moderación (IG 55-70)
-- 🔴 **Rojo**: Consumir ocasionalmente (IG > 70, alta azúcar)
+El proyecto incluye pruebas unitarias con Jest y React Testing Library. Para ejecutar las pruebas:
 
-### Base de Datos de Alimentos
+```bash
+# Ejecutar todas las pruebas
+npm run test
 
-Incluye información sobre:
-- Índice glucémico
-- Carbohidratos
-- Fibra
-- Azúcares
-- Porción recomendada
-- Nombres comunes
+# Ejecutar pruebas en modo watch
+npm run test:watch
+```
 
-### Contenido Educativo
+## Despliegue
 
-Artículos y recursos interactivos sobre:
-- Diabetes tipo 2
-- Planificación nutricional
-- Índice glucémico
-- Hábitos saludables
-- Ejercicio y salud
+Para compilar la aplicación para producción:
 
-## Rutas Disponibles
+```bash
+npm run build
+```
 
-- `/` - Página de inicio
-- `/login` - Inicio de sesión
-- `/register` - Registro de usuarios
-- `/foods` - Búsqueda de alimentos
-- `/education` - Contenido educativo
+Los archivos compilados se generarán en la carpeta `dist/`.
 
-## Próximas Características
+## Contribución
 
-- 📈 Seguimiento de glucosa
-- 🍽️ Planificación de comidas
-- 📱 Versión móvil (React Native)
-- 🔄 Conexión con API backend
+1. Crear una rama para la nueva funcionalidad (`git checkout -b feature/nueva-funcionalidad`)
+2. Realizar los cambios necesarios
+3. Commitear los cambios (`git commit -am 'Añadir nueva funcionalidad'`)
+4. Push a la rama (`git push origin feature/nueva-funcionalidad`)
+5. Crear un Pull Request
 
 ## Licencia
 

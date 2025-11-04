@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import type { FoodItem } from '../../types/food';
 import { getTrafficLightColor, getTrafficLightText } from '../../utils/trafficLightCalculator';
 
@@ -11,16 +11,65 @@ export const FoodDetails: React.FC<FoodDetailsProps> = ({ food, onClose }) => {
   const trafficLightColor = getTrafficLightColor(food.trafficLight);
   const trafficLightText = getTrafficLightText(food.trafficLight);
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      onClose();
+    }
+  };
+
+  useEffect(() => {
+    // Focus trap y manejo de escape key
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    document.addEventListener('keydown', handleEscape);
+    // Focus en el modal al abrir
+    const modalContent = document.querySelector('.modal-content') as HTMLElement;
+    if (modalContent) {
+      modalContent.focus();
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [onClose]);
+
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-        <button onClick={onClose} className="modal-close">×</button>
+    <div
+      className="modal-overlay"
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="food-modal-title"
+      aria-describedby="food-modal-description"
+      onKeyDown={handleKeyDown}
+    >
+      <div
+        className="modal-content"
+        onClick={(e) => e.stopPropagation()}
+        tabIndex={-1}
+      >
+        <button
+          onClick={onClose}
+          className="modal-close"
+          aria-label="Cerrar modal"
+        >
+          <span aria-hidden="true">×</span>
+        </button>
 
         <div className="modal-header">
-          <div className="traffic-light-badge" style={{ backgroundColor: trafficLightColor }} />
+          <div
+            className="traffic-light-badge"
+            style={{ backgroundColor: trafficLightColor }}
+            role="img"
+            aria-label={trafficLightText}
+          />
           <div>
-            <h2 className="modal-title">{food.name}</h2>
-            <p className="modal-subtitle">{trafficLightText}</p>
+            <h2 className="modal-title" id="food-modal-title">{food.name}</h2>
+            <p className="modal-subtitle" id="food-modal-description">{trafficLightText}</p>
           </div>
         </div>
 
@@ -97,6 +146,12 @@ export const FoodDetails: React.FC<FoodDetailsProps> = ({ food, onClose }) => {
           position: relative;
           box-shadow: 0 20px 60px rgba(0,0,0,0.3);
           animation: slideIn 0.3s ease-out;
+          outline: none;
+        }
+
+        .modal-content:focus {
+          outline: 3px solid #667eea;
+          outline-offset: 2px;
         }
 
         .modal-close {
