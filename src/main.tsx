@@ -5,6 +5,7 @@ import App from "./App";
 import "./index.css";
 import { validateEnv } from "./config/env";
 import { AuthProvider } from "./contexts/AuthContext";
+import { FavoritesProvider } from "./contexts/FavoritesContext";
 
 // Validar variables de entorno al iniciar la aplicación
 try {
@@ -24,8 +25,10 @@ try {
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <AuthProvider>
-      <App />
-      <Toaster />
+      <FavoritesProvider>
+        <App />
+        <Toaster />
+      </FavoritesProvider>
     </AuthProvider>
   </React.StrictMode>
 );

@@ -15,6 +15,8 @@ export default {
     '^../config/env$': '<rootDir>/src/__mocks__/config/env.ts',
     '^../../config/env$': '<rootDir>/src/__mocks__/config/env.ts',
     '^../../services/authService$': '<rootDir>/src/__mocks__/services/authService.ts',
+    '^../services/profileService$': '<rootDir>/src/__mocks__/services/profileService.ts',
+    '^../../services/profileService$': '<rootDir>/src/__mocks__/services/profileService.ts',
     '\\.(css|less|scss|sass)$': 'identity-obj-proxy'
   },
   setupFilesAfterEnv: ['<rootDir>/src/setupTests.ts'],

@@ -123,7 +123,7 @@ export const authService = {
       return true;
     } catch (error: unknown) {
       // Si hay un error, asumimos que no estamos autenticados
-      console.error('Authentication check failed:', error);
+      console.log('Authentication check failed - user not authenticated:', error);
       return false;
     }
   },

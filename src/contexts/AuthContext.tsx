@@ -50,9 +50,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       
       if (!USE_MOCK_SERVICE && !isTestEnv) {
         try {
+          console.log('Checking authentication status...');
           const isAuthenticated = await authService.isAuthenticated();
+          console.log('Authentication check result:', isAuthenticated);
           if (isAuthenticated) {
             const currentUser = await authService.getCurrentUser();
+            console.log('Current user:', currentUser);
             setUser({
               id: currentUser.id,
               name: currentUser.name,
@@ -60,18 +63,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
               age: currentUser.age,
               diabetesType: currentUser.diabetesType,
             });
+          } else {
+            console.log('User is not authenticated, setting user to null');
+            setUser(null);
           }
         } catch (error) {
           // Si no hay sesión activa, el error es esperado
-          console.log('No hay sesión activa');
-          // Silenciar el error ya que es esperado cuando no hay sesión activa
-          console.error(error);
+          console.log('No active session found, user is not authenticated:', error);
+          setUser(null);
         } finally {
           // Siempre establecer isLoading a false después de verificar la autenticación
+          console.log('Finished authentication check, setting isLoading to false');
           setIsLoading(false);
         }
       } else {
         // En entorno de pruebas o cuando se usa el servicio mock, establecer isLoading a false inmediatamente
+        console.log('Using mock service or test environment, setting isLoading to false');
         setIsLoading(false);
       }
     };
@@ -109,10 +116,29 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const register = useCallback(async (data: RegisterData) => {
     try {
       setIsLoading(true);
+      // Register the user
       await authService.register(data);
-      toastSuccess('¡Cuenta creada exitosamente! Por favor inicia sesión.');
-      // Redirect to login after registration
-      window.location.href = '/login';
+      toastSuccess('¡Cuenta creada exitosamente!');
+      
+      // Auto-login after registration as per project requirements
+      // Use the same credentials to login
+      const loginCredentials: LoginCredentials = {
+        email: data.email,
+        password: data.password
+      };
+      
+      // Perform login
+      const response: AuthResponse = await authService.login(loginCredentials);
+      setUser({
+        id: response.user.id,
+        name: response.user.name,
+        email: response.user.email,
+        age: response.user.age,
+        diabetesType: response.user.diabetesType,
+      });
+      
+      // Redirect to home screen after auto-login
+      window.location.href = '/home';
     } catch (error) {
       const errorMessage = getErrorMessage(error);
       toastError(errorMessage);

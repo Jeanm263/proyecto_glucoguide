@@ -1,11 +1,6 @@
 import apiClient from './api';
 import type { FoodItem, FoodSearchFilters } from '../types/food';
 
-/**
- * Servicio para obtener alimentos desde el backend
- * TODO: Conectar con endpoints reales del backend
- */
-
 export const foodService = {
   /**
    * Obtener todos los alimentos
@@ -77,4 +72,19 @@ export const foodService = {
       return null;
     }
   },
+
+  /**
+   * Marcar alimento como favorito
+   */
+  async toggleFavorite(foodId: string): Promise<boolean> {
+    try {
+      // En una implementación real, esto llamaría al servicio de perfil
+      // Por ahora, solo simulamos la funcionalidad
+      console.log('Toggle favorite for food:', foodId);
+      return true;
+    } catch (error) {
+      console.error('Error toggling favorite:', error);
+      return false;
+    }
+  }
 };

@@ -15,23 +15,24 @@ export const ProfileScreen: React.FC = () => {
   };
 
   const handleEditProfile = () => {
-    // TODO: Implementar edición de perfil
-    console.log('Editar perfil');
+    // Redirigir a la pantalla de edición de perfil
+    navigate('/profile/edit');
   };
 
   const handleViewHistory = () => {
     // TODO: Implementar historial de alimentos
-    console.log('Ver historial');
+    // console.log('Ver historial');
+    navigate('/food-tracking');
   };
 
   const handleViewFavorites = () => {
-    // TODO: Implementar alimentos favoritos
-    console.log('Ver favoritos');
+    // Navegar a la pantalla de alimentos favoritos
+    navigate('/favorites');
   };
 
   const handleViewSettings = () => {
-    // TODO: Implementar configuración
-    console.log('Ver configuración');
+    // Navegar a la pantalla de configuración
+    navigate('/settings');
   };
 
   return (

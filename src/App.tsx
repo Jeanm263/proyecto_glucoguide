@@ -1,4 +1,4 @@
-import React, { useEffect, useState, Suspense } from "react";
+import React, { Suspense, useState } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { HomeScreen } from "./screens/HomeScreen";
 import { FoodSearchScreen } from "./screens/foods/FoodSearchScreen";
@@ -6,51 +6,16 @@ import { EducationScreen } from "./screens/education/EducationScreen";
 import { LoginScreen } from "./screens/auth/LoginScreen";
 import { RegisterScreen } from "./screens/auth/RegisterScreen";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
-import { authService } from "./services/authService";
 import { ProfileScreen } from "./screens/ProfileScreen";
 import { FoodTrackingScreen } from "./screens/foods/FoodTrackingScreen";
+import { ProfileEditScreen } from "./screens/ProfileEditScreen";
+import { FavoritesScreen } from "./screens/FavoritesScreen";
+import { SettingsScreen } from "./screens/SettingsScreen";
 
-// --- Redirección inicial: decide si va a /home o /login
+// --- Redirección inicial: siempre redirige a login primero
 const DefaultRedirect = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
-
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const authStatus = await authService.isAuthenticated();
-        setIsAuthenticated(!!authStatus); // fuerza boolean
-      } catch (error) {
-        console.error("Error checking authentication:", error);
-        setIsAuthenticated(false);
-      }
-    };
-    checkAuth();
-  }, []);
-
-  // Mostrar un loader mientras se valida
-  if (isAuthenticated === null) {
-    return (
-      <div
-        style={{
-          display: "flex",
-          height: "100vh",
-          alignItems: "center",
-          justifyContent: "center",
-          fontSize: "1.2rem",
-          color: "#444",
-        }}
-      >
-        Cargando...
-      </div>
-    );
-  }
-
-  // Redirige según autenticación
-  return isAuthenticated ? (
-    <Navigate to="/home" replace />
-  ) : (
-    <Navigate to="/login" replace />
-  );
+  // Siempre redirigir a login como punto de entrada inicial
+  return <Navigate to="/login" replace />;
 };
 
 const App: React.FC = () => {
@@ -110,6 +75,30 @@ const App: React.FC = () => {
           element={
             <ProtectedRoute>
               <ProfileScreen />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile/edit"
+          element={
+            <ProtectedRoute>
+              <ProfileEditScreen />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/favorites"
+          element={
+            <ProtectedRoute>
+              <FavoritesScreen />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute>
+              <SettingsScreen />
             </ProtectedRoute>
           }
         />
