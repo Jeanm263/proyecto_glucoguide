@@ -11,7 +11,7 @@ export const ProfileScreen: React.FC = () => {
   const handleLogout = () => {
     toastInfo('Cerrando sesión...');
     logout();
-    navigate('/login');
+    // La navegación se maneja en el logout
   };
 
   const handleEditProfile = () => {
@@ -20,8 +20,7 @@ export const ProfileScreen: React.FC = () => {
   };
 
   const handleViewHistory = () => {
-    // TODO: Implementar historial de alimentos
-    // console.log('Ver historial');
+    // Navegar a la pantalla de seguimiento de alimentos
     navigate('/food-tracking');
   };
 
