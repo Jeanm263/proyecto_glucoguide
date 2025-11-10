@@ -9,6 +9,7 @@ import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import { authService } from "./services/authService";
 import { ProfileScreen } from "./screens/ProfileScreen";
 import { FoodTrackingScreen } from "./screens/foods/FoodTrackingScreen";
+import { ProfileEditScreen } from "./screens/ProfileEditScreen";
 
 // --- Redirección inicial: decide si va a /home o /login
 const DefaultRedirect = () => {
@@ -110,6 +111,14 @@ const App: React.FC = () => {
           element={
             <ProtectedRoute>
               <ProfileScreen />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile/edit"
+          element={
+            <ProtectedRoute>
+              <ProfileEditScreen />
             </ProtectedRoute>
           }
         />

@@ -11,27 +11,27 @@ export const ProfileScreen: React.FC = () => {
   const handleLogout = () => {
     toastInfo('Cerrando sesión...');
     logout();
-    navigate('/login');
+    // La navegación se maneja en el logout
   };
 
   const handleEditProfile = () => {
-    // TODO: Implementar edición de perfil
-    console.log('Editar perfil');
+    // Navegar a la pantalla de edición de perfil
+    navigate('/profile/edit');
   };
 
   const handleViewHistory = () => {
-    // TODO: Implementar historial de alimentos
-    console.log('Ver historial');
+    // Navegar a la pantalla de seguimiento de alimentos
+    navigate('/food-tracking');
   };
 
   const handleViewFavorites = () => {
-    // TODO: Implementar alimentos favoritos
-    console.log('Ver favoritos');
+    // Navegar a la pantalla de búsqueda de alimentos
+    navigate('/foods');
   };
 
   const handleViewSettings = () => {
-    // TODO: Implementar configuración
-    console.log('Ver configuración');
+    // Navegar a una pantalla de configuración
+    toastInfo('Función de configuración en desarrollo');
   };
 
   return (
