@@ -83,46 +83,60 @@ describe('EducationScreen', () => {
     jest.clearAllMocks();
   });
 
-  it('debería renderizar correctamente el encabezado y título', () => {
+  it('debería renderizar correctamente el encabezado y título', async () => {
     render(
       <BrowserRouter>
         <EducationScreen />
       </BrowserRouter>
     );
     
-    expect(screen.getByText('Educación en Diabetes')).toBeInTheDocument();
-    expect(screen.getByText('Inicio')).toBeInTheDocument();
+    // Esperar a que se cargue el contenido
+    await waitFor(() => {
+      expect(screen.getByText('Educación en Diabetes')).toBeInTheDocument();
+      expect(screen.getByText('Inicio')).toBeInTheDocument();
+    });
   });
 
-  it('debería renderizar la barra de búsqueda', () => {
+  it('debería renderizar la barra de búsqueda', async () => {
     render(
       <BrowserRouter>
         <EducationScreen />
       </BrowserRouter>
     );
     
-    expect(screen.getByPlaceholderText('Buscar artículos, videos, etc...')).toBeInTheDocument();
+    // Esperar a que se cargue el contenido
+    await waitFor(() => {
+      expect(screen.getByPlaceholderText('Buscar artículos, videos, etc...')).toBeInTheDocument();
+    });
   });
 
-  it('debería renderizar los filtros de nivel', () => {
+  it('debería renderizar los filtros de nivel', async () => {
     render(
       <BrowserRouter>
         <EducationScreen />
       </BrowserRouter>
     );
     
-    expect(screen.getByText('Todos')).toBeInTheDocument();
-    expect(screen.getByText('Básico')).toBeInTheDocument();
-    expect(screen.getByText('Intermedio')).toBeInTheDocument();
-    expect(screen.getByText('Avanzado')).toBeInTheDocument();
+    // Esperar a que se cargue el contenido
+    await waitFor(() => {
+      expect(screen.getByText('Todos')).toBeInTheDocument();
+      expect(screen.getByText('Básico')).toBeInTheDocument();
+      expect(screen.getByText('Intermedio')).toBeInTheDocument();
+      expect(screen.getByText('Avanzado')).toBeInTheDocument();
+    });
   });
 
-  it('debería navegar a la pantalla de inicio cuando se hace clic en el botón de volver', () => {
+  it('debería navegar a la pantalla de inicio cuando se hace clic en el botón de volver', async () => {
     render(
       <BrowserRouter>
         <EducationScreen />
       </BrowserRouter>
     );
+    
+    // Esperar a que se cargue el contenido
+    await waitFor(() => {
+      expect(screen.getByText('Educación en Diabetes')).toBeInTheDocument();
+    });
     
     const backButton = screen.getByText('Inicio');
     fireEvent.click(backButton);
@@ -130,12 +144,17 @@ describe('EducationScreen', () => {
     expect(mockNavigate).toHaveBeenCalledWith('/home');
   });
 
-  it('debería permitir escribir en la barra de búsqueda', () => {
+  it('debería permitir escribir en la barra de búsqueda', async () => {
     render(
       <BrowserRouter>
         <EducationScreen />
       </BrowserRouter>
     );
+    
+    // Esperar a que se cargue el contenido
+    await waitFor(() => {
+      expect(screen.getByText('Educación en Diabetes')).toBeInTheDocument();
+    });
     
     const searchInput = screen.getByPlaceholderText('Buscar artículos, videos, etc...');
     fireEvent.change(searchInput, { target: { value: 'diabetes' } });

@@ -69,6 +69,11 @@ jest.mock('../../../hooks/useDebounce', () => ({
   useDebounce: (value: string) => value,
 }));
 
+// Mock de config/env
+jest.mock('../../../config/env', () => ({
+  USE_MOCK_SERVICE: true,
+}));
+
 describe('FoodSearchScreen', () => {
   beforeEach(() => {
     jest.clearAllMocks();

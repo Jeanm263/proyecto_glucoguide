@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { HomeScreen } from './screens/HomeScreen';
 import { FoodSearchScreen } from './screens/foods/FoodSearchScreen';
+import { FoodTrackingScreen } from './screens/foods/FoodTrackingScreen';
 import { EducationScreen } from './screens/education/EducationScreen';
 import { LoginScreen } from './screens/auth/LoginScreen';
 import { RegisterScreen } from './screens/auth/RegisterScreen';
@@ -54,6 +55,14 @@ const App: React.FC = () => {
           element={
             <ProtectedRoute>
               <EducationScreen />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/food-tracking"
+          element={
+            <ProtectedRoute>
+              <FoodTrackingScreen />
             </ProtectedRoute>
           }
         />

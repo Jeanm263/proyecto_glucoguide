@@ -16,6 +16,11 @@ jest.mock('../../../services/foodLogService', () => ({
   },
 }));
 
+// Mock de config/env
+jest.mock('../../../config/env', () => ({
+  USE_MOCK_SERVICE: true,
+}));
+
 // Mock de useDebounce hook
 jest.mock('../../../hooks/useDebounce', () => ({
   useDebounce: (value: string) => value,

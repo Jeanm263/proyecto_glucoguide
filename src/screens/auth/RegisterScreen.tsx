@@ -24,10 +24,10 @@ export const RegisterScreen: React.FC = () => {
         email: data.email,
         password: data.password,
       });
-      // Después de registrar, redirigir al login para que el usuario inicie sesión
+      // After registration, redirect to login screen
       navigate('/login');
     } catch (err) {
-      // El error ya se maneja en el contexto con toast
+      // Error is handled in context with toast
       console.error('Register error:', err);
     }
   };

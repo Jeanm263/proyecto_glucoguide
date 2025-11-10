@@ -21,6 +21,11 @@ jest.mock('../../contexts/AuthContext', () => ({
   }),
 }));
 
+// Mock de config/env
+jest.mock('../../config/env', () => ({
+  USE_MOCK_SERVICE: true,
+}));
+
 const renderWithProviders = (component: React.ReactElement) => {
   return render(
     <BrowserRouter>

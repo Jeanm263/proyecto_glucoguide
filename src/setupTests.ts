@@ -14,3 +14,17 @@ Object.defineProperty(globalThis, 'import', {
   enumerable: true,
   configurable: true
 });
+
+// Mock console.error and console.log to prevent network errors from cluttering test output
+const originalError = console.error;
+const originalLog = console.log;
+
+beforeAll(() => {
+  console.error = jest.fn();
+  console.log = jest.fn();
+});
+
+afterAll(() => {
+  console.error = originalError;
+  console.log = originalLog;
+});

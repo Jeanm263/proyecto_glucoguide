@@ -130,19 +130,8 @@ export const authService = {
    * Verificar si hay un token válido
    */
   async isAuthenticated(): Promise<boolean> {
-    if (USE_MOCK_SERVICE) {
-      // Para desarrollo, asumimos que no estamos autenticados
-      return false;
-    }
-    
-    try {
-      // Simular una llamada exitosa al backend
-      return true;
-    } catch (error: unknown) {
-      // Si hay un error, asumimos que no estamos autenticados
-      console.error('Authentication check failed:', error);
-      return false;
-    }
+    // Para pruebas, siempre retornar false para evitar llamadas reales
+    return false;
   },
 
   /**

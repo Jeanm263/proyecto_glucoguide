@@ -5,7 +5,7 @@
     "esModuleInterop": true,
     "verbatimModuleSyntax": false,
     "types": ["jest", "node", "@testing-library/jest-dom"],
-    "module": "commonjs",
+    "module": "ESNext",
     "moduleResolution": "node",
     "allowSyntheticDefaultImports": true
   },
