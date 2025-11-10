@@ -8,9 +8,6 @@ import { RegisterScreen } from "./screens/auth/RegisterScreen";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import { ProfileScreen } from "./screens/ProfileScreen";
 import { FoodTrackingScreen } from "./screens/foods/FoodTrackingScreen";
-import { ProfileEditScreen } from "./screens/ProfileEditScreen";
-import { FavoritesScreen } from "./screens/FavoritesScreen";
-import { SettingsScreen } from "./screens/SettingsScreen";
 
 // --- Redirección inicial: siempre redirige a login primero
 const DefaultRedirect = () => {
@@ -75,30 +72,6 @@ const App: React.FC = () => {
           element={
             <ProtectedRoute>
               <ProfileScreen />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/profile/edit"
-          element={
-            <ProtectedRoute>
-              <ProfileEditScreen />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/favorites"
-          element={
-            <ProtectedRoute>
-              <FavoritesScreen />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/settings"
-          element={
-            <ProtectedRoute>
-              <SettingsScreen />
             </ProtectedRoute>
           }
         />

@@ -8,7 +8,6 @@ export interface UserProfile {
   age?: number;
   diabetesType?: string;
   preferences?: {
-    favoriteFoods?: string[];
     notificationSettings?: {
       medicationReminders?: boolean;
       mealReminders?: boolean;
@@ -49,7 +48,6 @@ export const profileService = {
         age: 30,
         diabetesType: 'type2',
         preferences: {
-          favoriteFoods: ['1', '2'],
           notificationSettings: {
             medicationReminders: true,
             mealReminders: true,
@@ -85,32 +83,6 @@ export const profileService = {
       console.error('Error updating profile:', error);
       throw error;
     }
-  },
-
-  /**
-   * Obtener alimentos favoritos
-   */
-  async getFavoriteFoods(): Promise<string[]> {
-    // Para pruebas, retornar valores fijos
-    return ['1', '2', '3'];
-  },
-
-  /**
-   * Agregar alimento a favoritos
-   */
-  async addFavoriteFood(foodId: string): Promise<string[]> {
-    // Para pruebas, retornar valores fijos
-    return ['1', '2', '3', foodId];
-  },
-
-  /**
-   * Eliminar alimento de favoritos
-   */
-  async removeFavoriteFood(_foodId: string): Promise<string[]> {
-    // Para pruebas, retornar valores fijos
-    // El parámetro se marca como usado para evitar el error de linter
-    void _foodId;
-    return ['1', '2'];
   },
 
   /**

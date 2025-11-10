@@ -24,11 +24,6 @@ export const ProfileScreen: React.FC = () => {
     navigate('/food-tracking');
   };
 
-  const handleViewFavorites = () => {
-    // Navegar a la pantalla de alimentos favoritos
-    navigate('/favorites');
-  };
-
   const handleViewSettings = () => {
     // Navegar a la pantalla de configuración
     navigate('/settings');
@@ -88,16 +83,6 @@ export const ProfileScreen: React.FC = () => {
             <div className="option-icon">📅</div>
             <h3 className="option-title">Historial</h3>
             <p className="option-description">Ver alimentos registrados</p>
-          </button>
-
-          <button 
-            className="option-card card-hover"
-            onClick={handleViewFavorites}
-            aria-label="Alimentos favoritos"
-          >
-            <div className="option-icon">⭐</div>
-            <h3 className="option-title">Favoritos</h3>
-            <p className="option-description">Tus alimentos preferidos</p>
           </button>
 
           <button 

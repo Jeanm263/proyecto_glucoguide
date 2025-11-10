@@ -71,20 +71,5 @@ export const foodService = {
       // Devolver null en caso de error
       return null;
     }
-  },
-
-  /**
-   * Marcar alimento como favorito
-   */
-  async toggleFavorite(foodId: string): Promise<boolean> {
-    try {
-      // En una implementación real, esto llamaría al servicio de perfil
-      // Por ahora, solo simulamos la funcionalidad
-      console.log('Toggle favorite for food:', foodId);
-      return true;
-    } catch (error) {
-      console.error('Error toggling favorite:', error);
-      return false;
-    }
   }
 };
