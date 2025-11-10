@@ -1,71 +1,105 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FoodCard } from '../../components/nutrition/FoodCard';
-import { FoodDetails } from '../../components/nutrition/FoodDetails';
-import { INITIAL_FOODS } from '../../constants/foodsData';
-import { useDebounce } from '../../hooks/useDebounce';
+import { BottomNavigation } from '../../components/common/BottomNavigation';
+import { AddFoodModal } from '../../components/nutrition/AddFoodModal';
 import type { FoodItem } from '../../types/food';
-import type { FoodLog } from '../../types/foodLog';
-import { foodLogService } from '../../services/foodLogService';
-import { USE_MOCK_SERVICE } from '../../config/env';
+
+interface FoodEntry {
+  id: string;
+  food: FoodItem;
+  portion: string;
+  time: string;
+  date: string; // Agregar fecha al registro
+}
 
 export const FoodTrackingScreen: React.FC = () => {
   const navigate = useNavigate();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('todas');
-  const [selectedFood, setSelectedFood] = useState<FoodItem | null>(null);
-  const [foodLogs, setFoodLogs] = useState<FoodLog[]>([]);
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0]); // YYYY-MM-DD
+  const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
+  const [foodEntries, setFoodEntries] = useState<FoodEntry[]>([
+    {
+      id: '1',
+      food: {
+        id: 'apple-1',
+        name: 'Manzana',
+        category: 'frutas',
+        glycemicIndex: 38,
+        carbohydrates: 25,
+        fiber: 4,
+        sugars: 19,
+        portion: '1 unidad mediana (182g)',
+        trafficLight: 'green',
+        commonNames: ['manzana roja', 'manzana verde', 'apple']
+      },
+      portion: '1 unidad mediana',
+      time: '08:30',
+      date: new Date().toISOString().split('T')[0]
+    },
+    {
+      id: '2',
+      food: {
+        id: 'bread-1',
+        name: 'Pan integral',
+        category: 'cereales',
+        glycemicIndex: 55,
+        carbohydrates: 15,
+        fiber: 2,
+        sugars: 2,
+        portion: '2 rebanadas (60g)',
+        trafficLight: 'yellow',
+        commonNames: ['pan integral', 'whole wheat bread']
+      },
+      portion: '2 rebanadas',
+      time: '13:15',
+      date: new Date().toISOString().split('T')[0]
+    }
+  ]);
+  const [showAddModal, setShowAddModal] = useState(false);
 
-  // Debounce del search query para mejorar performance
-  const debouncedSearchQuery = useDebounce(searchQuery, 300);
-
-  // Cargar alimentos y registros al montar el componente
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // Cargar registros de alimentos para la fecha seleccionada
-        if (!USE_MOCK_SERVICE) {
-          const logs = await foodLogService.getAllFoodLogs({ date });
-          setFoodLogs(logs);
-        }
-      } catch (error) {
-        console.error('Error al cargar datos:', error);
-      }
+  const handleAddFood = (food: FoodItem, portion: string, time: string) => {
+    const newEntry: FoodEntry = {
+      id: Date.now().toString(),
+      food,
+      portion,
+      time,
+      date: selectedDate // Usar la fecha seleccionada
     };
-
-    fetchData();
-  }, [date]);
-
-  const filteredFoods = INITIAL_FOODS.filter(food => {
-    // Filter by category
-    if (selectedCategory !== 'todas' && food.category !== selectedCategory) {
-      return false;
-    }
-
-    // Filter by search query (usando el valor debounced)
-    if (debouncedSearchQuery) {
-      const query = debouncedSearchQuery.toLowerCase();
-      return (
-        food.name.toLowerCase().includes(query) ||
-        food.commonNames.some(name => name.toLowerCase().includes(query))
-      );
-    }
-
-    return true;
-  });
-
-  const handleFoodPress = (food: FoodItem) => {
-    setSelectedFood(food);
+    setFoodEntries(prev => [...prev, newEntry]);
   };
 
-  const categories = ['todas', ...new Set(INITIAL_FOODS.map(food => food.category))];
+  const handleDeleteFood = (id: string) => {
+    setFoodEntries(prev => prev.filter(entry => entry.id !== id));
+  };
+
+  const totalCarbs = foodEntries
+    .filter(entry => entry.date === selectedDate)
+    .reduce((sum, entry) => sum + entry.food.carbohydrates, 0);
+    
+  const totalFiber = foodEntries
+    .filter(entry => entry.date === selectedDate)
+    .reduce((sum, entry) => sum + entry.food.fiber, 0);
+
+  const formatTrafficLight = (value: number, threshold: number) => {
+    if (value <= threshold * 0.5) return '🟢'; // Bajo
+    if (value <= threshold * 0.8) return '🟡'; // Medio
+    return '🔴'; // Alto
+  };
+
+  // Filtrar alimentos por fecha seleccionada y agrupar por hora
+  const filteredEntries = foodEntries.filter(entry => entry.date === selectedDate);
+  
+  const groupedEntries = filteredEntries.reduce((acc, entry) => {
+    if (!acc[entry.time]) {
+      acc[entry.time] = [];
+    }
+    acc[entry.time].push(entry);
+    return acc;
+  }, {} as Record<string, FoodEntry[]>);
 
   return (
-    <div className="food-tracking-page">
+    <div className="tracking-page">
       {/* Header */}
-      <header className="food-tracking-header">
-        <div className="food-tracking-header-content">
+      <header className="tracking-header">
+        <div className="tracking-header-content">
           <button
             onClick={() => navigate('/home')}
             className="btn-back"
@@ -73,128 +107,143 @@ export const FoodTrackingScreen: React.FC = () => {
           >
             <span aria-hidden="true">←</span> Inicio
           </button>
-          <h1 className="food-tracking-title">
-            <span aria-hidden="true">📝</span> Seguimiento de Alimentos
+          <h1 className="tracking-title">
+            <span aria-hidden="true">📝</span> Seguimiento
           </h1>
         </div>
       </header>
 
-      {/* Date Selector */}
-      <div className="date-selector">
-        <label htmlFor="date-input">Fecha:</label>
-        <input
-          id="date-input"
-          type="date"
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
-          className="date-input"
-        />
-      </div>
-
       {/* Content */}
-      <div className="food-tracking-content fade-in">
-        {/* Search and Filters */}
-        <div className="search-card" role="search">
-          <label htmlFor="food-search-input" className="sr-only">
-            Buscar alimentos
+      <div className="tracking-content fade-in">
+        {/* Date Selector */}
+        <div className="date-selector">
+          <label htmlFor="date-input" className="date-label">
+            Fecha:
           </label>
           <input
-            id="food-search-input"
-            type="text"
-            placeholder="Buscar alimentos..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="search-input"
-            aria-label="Buscar alimentos por nombre"
+            id="date-input"
+            type="date"
+            value={selectedDate}
+            onChange={(e) => setSelectedDate(e.target.value)}
+            className="date-input"
           />
-
-          <div className="category-filters" role="group" aria-label="Filtros por categoría">
-            {categories.map(category => (
-              <button
-                key={category}
-                onClick={() => setSelectedCategory(category)}
-                className={`category-btn ${selectedCategory === category ? 'active' : ''}`}
-                aria-pressed={selectedCategory === category}
-              >
-                {category === 'todas' ? 'Todas' : category}
-              </button>
-            ))}
-          </div>
         </div>
 
-        {/* Food Logs Summary */}
-        <div className="logs-summary">
-          <h2>Resumen del día</h2>
-          <div className="summary-stats">
-            <div className="stat-card">
-              <span className="stat-value">{foodLogs.length}</span>
-              <span className="stat-label">Alimentos registrados</span>
+        {/* Summary Cards */}
+        <div className="summary-grid">
+          <div className="summary-card">
+            <div className="summary-icon">📊</div>
+            <div className="summary-info">
+              <h3 className="summary-title">Carbohidratos</h3>
+              <p className="summary-value">{totalCarbs}g</p>
             </div>
-            <div className="stat-card">
-              <span className="stat-value">0g</span>
-              <span className="stat-label">Carbohidratos</span>
-            </div>
-            <div className="stat-card">
-              <span className="stat-value">0g</span>
-              <span className="stat-label">Fibra</span>
+          </div>
+          
+          <div className="summary-card">
+            <div className="summary-icon">🌾</div>
+            <div className="summary-info">
+              <h3 className="summary-title">Fibra</h3>
+              <p className="summary-value">{totalFiber}g</p>
             </div>
           </div>
         </div>
 
-        {/* Results Header */}
-        <div className="results-header">
-          <h2 className="results-title" id="foods-results-heading">
-            Alimentos disponibles{' '}
-            {filteredFoods.length > 0 && (
-              <span className="results-count" aria-label={`${filteredFoods.length} alimentos encontrados`}>
-                ({filteredFoods.length})
-              </span>
-            )}
-          </h2>
+        {/* Add Food Button */}
+        <div className="add-food-section">
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="btn-add-food"
+            aria-label="Agregar alimento"
+          >
+            <span aria-hidden="true">+</span> Agregar Alimento
+          </button>
         </div>
 
-        {/* Results */}
-        {filteredFoods.length === 0 ? (
-          <div className="empty-state" role="status" aria-live="polite">
-            <div className="empty-icon" aria-hidden="true">🍎</div>
-            <p className="empty-message">No se encontraron alimentos</p>
-            <p className="empty-hint">Intenta con otros términos de búsqueda</p>
-          </div>
-        ) : (
-          <div className="foods-grid" role="list" aria-labelledby="foods-results-heading">
-            {filteredFoods.map(food => (
-              <div key={food.id} role="listitem">
-                <FoodCard
-                  food={food as FoodItem}
-                  onPress={() => handleFoodPress(food as FoodItem)}
-                />
-              </div>
-            ))}
-          </div>
-        )}
+        {/* Food Entries */}
+        <div className="entries-section">
+          <h2 className="entries-title">Alimentos de hoy</h2>
+          
+          {filteredEntries.length === 0 ? (
+            <div className="empty-state">
+              <div className="empty-icon">🍽️</div>
+              <p className="empty-message">No has registrado alimentos hoy</p>
+              <p className="empty-hint">Agrega tu primer alimento</p>
+            </div>
+          ) : (
+            <div className="entries-list">
+              {Object.keys(groupedEntries)
+                .sort()
+                .map((time) => (
+                  <div key={time} className="time-group">
+                    <div className="time-header">
+                      <h3 className="time-title">⏰ {time}</h3>
+                    </div>
+                    {groupedEntries[time].map((entry) => (
+                      <div key={entry.id} className="entry-card">
+                        <div className="entry-header">
+                          <div className="entry-time">{entry.time}</div>
+                          <button
+                            onClick={() => handleDeleteFood(entry.id)}
+                            className="btn-delete"
+                            aria-label={`Eliminar ${entry.food.name}`}
+                          >
+                            ×
+                          </button>
+                        </div>
+                        <div className="entry-content">
+                          <h3 className="entry-food-name">{entry.food.name}</h3>
+                          <p className="entry-portion">{entry.portion}</p>
+                          <div className="entry-nutrition">
+                            <span className="nutrition-item">
+                              Carbs: <strong>{formatTrafficLight(entry.food.carbohydrates, 20)} {entry.food.carbohydrates}g</strong>
+                            </span>
+                            <span className="nutrition-item">
+                              Fibra: <strong>{formatTrafficLight(entry.food.fiber, 5)} {entry.food.fiber}g</strong>
+                            </span>
+                          </div>
+                          <div className="entry-category">
+                            <span className={`category-tag ${entry.food.category}`}>
+                              {entry.food.category}
+                            </span>
+                            <span className="glycemic-index">
+                              IG: {entry.food.glycemicIndex}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ))}
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Food Detail Modal */}
-      {selectedFood && (
-        <FoodDetails
-          food={selectedFood}
-          onClose={() => setSelectedFood(null)}
+      {/* Add Food Modal */}
+      {showAddModal && (
+        <AddFoodModal
+          onClose={() => setShowAddModal(false)}
+          onAdd={handleAddFood}
         />
       )}
 
+      {/* Bottom Navigation */}
+      <BottomNavigation />
+
       <style>{`
-        .food-tracking-page {
+        .tracking-page {
           min-height: 100vh;
           background: #f5f7fa;
+          padding-bottom: 80px;
         }
 
-        .food-tracking-header {
-          background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        .tracking-header {
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
           padding: 24px 20px;
           box-shadow: 0 2px 12px rgba(0,0,0,0.1);
         }
 
-        .food-tracking-header-content {
+        .tracking-header-content {
           max-width: 1200px;
           margin: 0 auto;
           display: flex;
@@ -220,7 +269,7 @@ export const FoodTrackingScreen: React.FC = () => {
           transform: translateX(-2px);
         }
 
-        .food-tracking-title {
+        .tracking-title {
           margin: 0;
           font-size: 32px;
           font-weight: 700;
@@ -228,215 +277,341 @@ export const FoodTrackingScreen: React.FC = () => {
           text-shadow: 0 2px 8px rgba(0,0,0,0.2);
         }
 
-        .date-selector {
+        .tracking-content {
           max-width: 1200px;
-          margin: 20px auto;
-          padding: 0 20px;
-          display: flex;
-          align-items: center;
-          gap: 10px;
+          margin: 0 auto;
+          padding: 30px 20px;
         }
 
-        .date-selector label {
+        .date-selector {
+          background: white;
+          border-radius: 16px;
+          padding: 20px;
+          margin-bottom: 24px;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+          display: flex;
+          align-items: center;
+          gap: 16px;
+        }
+
+        .date-label {
           font-weight: 600;
           color: #333;
+          font-size: 16px;
         }
 
         .date-input {
-          padding: 8px 12px;
+          padding: 12px 16px;
           border: 2px solid #e0e0e0;
-          border-radius: 8px;
+          border-radius: 12px;
           font-size: 16px;
-        }
-
-        .food-tracking-content {
-          max-width: 1200px;
-          margin: 0 auto;
-          padding: 0 20px 30px;
-        }
-
-        .search-card {
-          background: white;
-          border-radius: 20px;
-          padding: 32px;
-          margin-bottom: 30px;
-          box-shadow: 0 4px 20px rgba(0,0,0,0.06);
-        }
-
-        .search-input {
-          width: 100%;
-          padding: 16px 20px;
-          font-size: 16px;
-          border: 2px solid #e0e0e0;
-          border-radius: 16px;
           outline: none;
           transition: all 0.3s ease;
-          background: #fafafa;
-          margin-bottom: 20px;
-          box-sizing: border-box;
         }
 
-        .search-input:focus {
-          border-color: #764ba2;
-          background: white;
-          box-shadow: 0 0 0 4px rgba(118, 75, 162, 0.1);
+        .date-input:focus {
+          border-color: #667eea;
+          box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
 
-        .category-filters {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 12px;
-        }
-
-        .category-btn {
-          padding: 10px 20px;
-          border-radius: 20px;
-          border: 2px solid #e0e0e0;
-          background: white;
-          color: #666;
-          cursor: pointer;
-          font-size: 14px;
-          font-weight: 600;
-          text-transform: capitalize;
-          transition: all 0.3s ease;
-        }
-
-        .category-btn:hover {
-          border-color: #764ba2;
-          color: #764ba2;
-        }
-
-        .category-btn.active {
-          background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
-          color: white;
-          border-color: transparent;
-          transform: translateY(-2px);
-          box-shadow: 0 4px 12px rgba(118, 75, 162, 0.3);
-        }
-
-        .category-btn:focus {
-          outline: 3px solid #764ba2;
-          outline-offset: 2px;
-        }
-
-        .logs-summary {
-          background: white;
-          border-radius: 20px;
-          padding: 24px;
-          margin-bottom: 30px;
-          box-shadow: 0 4px 20px rgba(0,0,0,0.06);
-        }
-
-        .logs-summary h2 {
-          margin: 0 0 20px 0;
-          font-size: 24px;
-          color: #333;
-        }
-
-        .summary-stats {
+        .summary-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+          grid-template-columns: 1fr 1fr;
           gap: 20px;
+          margin-bottom: 30px;
         }
 
-        .stat-card {
-          background: #f8f9fa;
+        .summary-card {
+          background: white;
           border-radius: 16px;
           padding: 20px;
-          text-align: center;
-          border: 1px solid #e9ecef;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+          display: flex;
+          align-items: center;
+          gap: 16px;
         }
 
-        .stat-value {
-          display: block;
+        .summary-icon {
           font-size: 28px;
-          font-weight: 700;
-          color: #764ba2;
-          margin-bottom: 8px;
         }
 
-        .stat-label {
+        .summary-info {
+          flex: 1;
+        }
+
+        .summary-title {
           font-size: 14px;
-          color: #666;
+          color: #999;
+          margin: 0 0 4px 0;
           font-weight: 500;
         }
 
-        .results-header {
-          margin-bottom: 24px;
-        }
-
-        .results-title {
-          font-size: 28px;
+        .summary-value {
+          font-size: 24px;
           font-weight: 700;
           color: #333;
           margin: 0;
         }
 
-        .results-count {
-          color: #764ba2;
+        .add-food-section {
+          text-align: center;
+          margin-bottom: 30px;
+        }
+
+        .btn-add-food {
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          color: white;
+          border: none;
+          border-radius: 16px;
+          padding: 16px 32px;
+          font-size: 16px;
           font-weight: 600;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          display: inline-flex;
+          align-items: center;
+          gap: 12px;
         }
 
-        .foods-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-          gap: 20px;
+        .btn-add-food:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
         }
 
-        .empty-state {
+        .entries-section {
           background: white;
           border-radius: 20px;
-          padding: 80px 40px;
-          text-align: center;
+          padding: 24px;
           box-shadow: 0 4px 20px rgba(0,0,0,0.06);
         }
 
-        .empty-icon {
-          font-size: 80px;
-          margin-bottom: 24px;
-          opacity: 0.5;
+        .entries-title {
+          font-size: 24px;
+          font-weight: 700;
+          color: #333;
+          margin: 0 0 20px 0;
         }
 
-        .empty-message {
+        .time-group {
+          margin-bottom: 24px;
+        }
+
+        .time-group:last-child {
+          margin-bottom: 0;
+        }
+
+        .time-header {
+          margin-bottom: 16px;
+          padding-bottom: 8px;
+          border-bottom: 2px solid #f0f0f0;
+        }
+
+        .time-title {
           font-size: 20px;
           font-weight: 600;
-          color: #333;
-          margin: 0 0 12px 0;
+          color: #667eea;
+          margin: 0;
+          display: flex;
+          align-items: center;
+          gap: 8px;
         }
 
-        .empty-hint {
-          font-size: 16px;
+        .entries-list {
+          display: flex;
+          flex-direction: column;
+          gap: 16px;
+        }
+
+        .entry-card {
+          border: 1px solid #e0e0e0;
+          border-radius: 16px;
+          padding: 16px;
+          transition: all 0.3s ease;
+        }
+
+        .entry-card:hover {
+          border-color: #667eea;
+          box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+        }
+
+        .entry-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 12px;
+        }
+
+        .entry-time {
+          font-size: 14px;
+          font-weight: 600;
+          color: #667eea;
+          background: rgba(102, 126, 234, 0.1);
+          padding: 4px 12px;
+          border-radius: 20px;
+        }
+
+        .btn-delete {
+          background: #ff6b6b;
+          color: white;
+          border: none;
+          border-radius: 50%;
+          width: 28px;
+          height: 28px;
+          font-size: 18px;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: all 0.3s ease;
+        }
+
+        .btn-delete:hover {
+          background: #ff5252;
+          transform: scale(1.1);
+        }
+
+        .entry-content {
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+        }
+
+        .entry-food-name {
+          font-size: 18px;
+          font-weight: 600;
+          color: #333;
+          margin: 0;
+        }
+
+        .entry-portion {
+          font-size: 14px;
           color: #999;
           margin: 0;
         }
 
-        .sr-only {
-          position: absolute;
-          width: 1px;
-          height: 1px;
-          padding: 0;
-          margin: -1px;
-          overflow: hidden;
-          clip: rect(0, 0, 0, 0);
-          white-space: nowrap;
-          border-width: 0;
+        .entry-nutrition {
+          display: flex;
+          gap: 16px;
+          margin-top: 4px;
+        }
+
+        .nutrition-item {
+          font-size: 14px;
+          color: #666;
+        }
+
+        .entry-category {
+          display: flex;
+          gap: 12px;
+          margin-top: 8px;
+        }
+
+        .category-tag {
+          padding: 4px 12px;
+          border-radius: 20px;
+          font-size: 12px;
+          font-weight: 500;
+          text-transform: capitalize;
+        }
+
+        .category-tag.frutas {
+          background: rgba(76, 175, 80, 0.1);
+          color: #4caf50;
+        }
+
+        .category-tag.verduras {
+          background: rgba(255, 193, 7, 0.1);
+          color: #ff9800;
+        }
+
+        .category-tag.cereales {
+          background: rgba(33, 150, 243, 0.1);
+          color: #2196f3;
+        }
+
+        .category-tag.proteinas {
+          background: rgba(156, 39, 176, 0.1);
+          color: #9c27b0;
+        }
+
+        .glycemic-index {
+          font-size: 12px;
+          color: #666;
+          background: #f5f5f5;
+          padding: 4px 8px;
+          border-radius: 12px;
+          font-weight: 500;
+        }
+
+        .empty-state {
+          text-align: center;
+          padding: 40px 20px;
+        }
+
+        .empty-icon {
+          font-size: 60px;
+          margin-bottom: 16px;
+          opacity: 0.5;
+        }
+
+        .empty-message {
+          font-size: 18px;
+          font-weight: 600;
+          color: #333;
+          margin: 0 0 8px 0;
+        }
+
+        .empty-hint {
+          font-size: 14px;
+          color: #999;
+          margin: 0;
         }
 
         @media (max-width: 768px) {
-          .search-card {
-            padding: 24px 20px;
-          }
-
-          .food-tracking-title {
-            font-size: 24px;
-          }
-
-          .foods-grid {
+          .summary-grid {
             grid-template-columns: 1fr;
           }
 
-          .summary-stats {
-            grid-template-columns: 1fr 1fr;
+          .tracking-title {
+            font-size: 24px;
+          }
+
+          .tracking-page {
+            padding-bottom: 90px;
+          }
+
+          .date-selector {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 12px;
+          }
+
+          .entry-nutrition {
+            flex-direction: column;
+            gap: 4px;
+          }
+
+          .entry-category {
+            flex-direction: column;
+            gap: 8px;
+          }
+
+          .time-header {
+            text-align: center;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .tracking-content {
+            padding: 20px 16px;
+          }
+
+          .summary-card {
+            padding: 16px;
+          }
+
+          .summary-value {
+            font-size: 20px;
           }
         }
       `}</style>

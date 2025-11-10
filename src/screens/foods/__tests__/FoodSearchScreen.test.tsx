@@ -87,7 +87,7 @@ describe('FoodSearchScreen', () => {
     );
     
     expect(screen.getByText('Buscar Alimentos')).toBeInTheDocument();
-    expect(screen.getByText('Inicio')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Volver al inicio' })).toBeInTheDocument();
   });
 
   it('debería renderizar la barra de búsqueda', () => {
@@ -120,7 +120,7 @@ describe('FoodSearchScreen', () => {
       </BrowserRouter>
     );
     
-    const backButton = screen.getByText('Inicio');
+    const backButton = screen.getByRole('button', { name: 'Volver al inicio' });
     fireEvent.click(backButton);
     
     expect(mockNavigate).toHaveBeenCalledWith('/home');

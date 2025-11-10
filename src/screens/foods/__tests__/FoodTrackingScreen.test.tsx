@@ -9,73 +9,37 @@ jest.mock('react-router-dom', () => ({
   useNavigate: () => mockNavigate,
 }));
 
-// Mock de foodLogService
-jest.mock('../../../services/foodLogService', () => ({
-  foodLogService: {
-    getAllFoodLogs: jest.fn().mockResolvedValue([]),
-  },
-}));
-
 // Mock de config/env
 jest.mock('../../../config/env', () => ({
   USE_MOCK_SERVICE: true,
-}));
-
-// Mock de useDebounce hook
-jest.mock('../../../hooks/useDebounce', () => ({
-  useDebounce: (value: string) => value,
 }));
 
 // Mock de INITIAL_FOODS
 jest.mock('../../../constants/foodsData', () => ({
   INITIAL_FOODS: [
     {
-      id: '1',
+      id: 'apple-1',
       name: 'Manzana',
       category: 'frutas',
       glycemicIndex: 38,
-      glycemicLoad: 6,
+      carbohydrates: 25,
+      fiber: 4,
+      sugars: 19,
+      portion: '1 unidad mediana (182g)',
       trafficLight: 'green',
-      nutrients: {
-        calories: 52,
-        carbohydrates: 14,
-        fiber: 2.4,
-        protein: 0.3,
-        fat: 0.2,
-        sugar: 10,
-        sodium: 1
-      },
-      commonNames: ['manzana roja', 'manzana verde'],
-      portionSizes: [
-        { size: '100g', grams: 100 },
-        { size: '1 unidad', grams: 150 }
-      ],
-      recommendations: 'Excelente opción para personas con diabetes. Rica en fibra y con bajo índice glucémico.',
-      warnings: 'Evitar en exceso si se combina con otras frutas altas en azúcar.'
+      commonNames: ['manzana roja', 'manzana verde', 'apple']
     },
     {
-      id: '2',
-      name: 'Arroz blanco',
+      id: 'bread-1',
+      name: 'Pan integral',
       category: 'cereales',
-      glycemicIndex: 73,
-      glycemicLoad: 37,
-      trafficLight: 'red',
-      nutrients: {
-        calories: 130,
-        carbohydrates: 28,
-        fiber: 0.4,
-        protein: 2.7,
-        fat: 0.3,
-        sugar: 0.1,
-        sodium: 1
-      },
-      commonNames: ['arroz blanco cocido'],
-      portionSizes: [
-        { size: '100g', grams: 100 },
-        { size: '1 taza', grams: 158 }
-      ],
-      recommendations: 'Consumir con moderación. Combinar con proteínas y vegetales para reducir el impacto glucémico.',
-      warnings: 'Evitar porciones grandes. Preferir arroz integral cuando sea posible.'
+      glycemicIndex: 55,
+      carbohydrates: 15,
+      fiber: 2,
+      sugars: 2,
+      portion: '2 rebanadas (60g)',
+      trafficLight: 'yellow',
+      commonNames: ['pan integral', 'whole wheat bread']
     }
   ]
 }));
@@ -92,8 +56,11 @@ describe('FoodTrackingScreen', () => {
       </BrowserRouter>
     );
     
-    expect(screen.getByText('Seguimiento de Alimentos')).toBeInTheDocument();
-    expect(screen.getByText('Inicio')).toBeInTheDocument();
+    // Verificar que se muestra el botón de inicio usando queryByRole
+    expect(screen.getByRole('button', { name: 'Volver al inicio' })).toBeInTheDocument();
+    
+    // Verificar que se muestra el título usando el heading
+    expect(screen.getByRole('heading', { level: 1 })).toBeInTheDocument();
   });
 
   it('debería renderizar el selector de fecha', () => {
@@ -104,30 +71,9 @@ describe('FoodTrackingScreen', () => {
     );
     
     expect(screen.getByLabelText('Fecha:')).toBeInTheDocument();
-    expect(screen.getByRole('textbox')).toBeInTheDocument();
-  });
-
-  it('debería renderizar la barra de búsqueda', () => {
-    render(
-      <BrowserRouter>
-        <FoodTrackingScreen />
-      </BrowserRouter>
-    );
-    
-    expect(screen.getByPlaceholderText('Buscar alimentos...')).toBeInTheDocument();
-  });
-
-  it('debería renderizar las categorías de filtros', () => {
-    render(
-      <BrowserRouter>
-        <FoodTrackingScreen />
-      </BrowserRouter>
-    );
-    
-    expect(screen.getByText('Todas')).toBeInTheDocument();
-    // Verificar que existen los botones de categoría usando queryAllByText
-    expect(screen.queryAllByText('frutas').length).toBeGreaterThan(0);
-    expect(screen.queryAllByText('cereales').length).toBeGreaterThan(0);
+    // Verificar que existe un input de tipo date
+    const dateInput = screen.getByLabelText('Fecha:') as HTMLInputElement;
+    expect(dateInput).toBeInTheDocument();
   });
 
   it('debería navegar a la pantalla de inicio cuando se hace clic en el botón de volver', () => {
@@ -137,81 +83,64 @@ describe('FoodTrackingScreen', () => {
       </BrowserRouter>
     );
     
-    const backButton = screen.getByText('Inicio');
+    const backButton = screen.getByRole('button', { name: 'Volver al inicio' });
     fireEvent.click(backButton);
     
     expect(mockNavigate).toHaveBeenCalledWith('/home');
   });
 
-  it('debería permitir escribir en la barra de búsqueda', () => {
+  it('debería mostrar alimentos registrados cuando hay entradas', () => {
     render(
       <BrowserRouter>
         <FoodTrackingScreen />
       </BrowserRouter>
     );
     
-    const searchInput = screen.getByPlaceholderText('Buscar alimentos...');
-    fireEvent.change(searchInput, { target: { value: 'manzana' } });
+    // Verificar que se muestran los alimentos registrados
+    expect(screen.getByText('Manzana')).toBeInTheDocument();
+    expect(screen.getByText('Pan integral')).toBeInTheDocument();
     
-    expect(searchInput).toHaveValue('manzana');
+    // Verificar que se muestran las horas
+    expect(screen.getByText('⏰ 08:30')).toBeInTheDocument();
+    expect(screen.getByText('⏰ 13:15')).toBeInTheDocument();
   });
 
-  it('debería mostrar alimentos disponibles cuando hay resultados', () => {
+  it('debería mostrar los totales de carbohidratos y fibra', () => {
     render(
       <BrowserRouter>
         <FoodTrackingScreen />
       </BrowserRouter>
     );
     
-    // Verificar que se muestran algunos alimentos
-    expect(screen.getByText('Manzana')).toBeInTheDocument();
-    expect(screen.getByText('Arroz blanco')).toBeInTheDocument();
+    // Verificar que se muestran los totales (25 + 15 = 40 carbs, 4 + 2 = 6 fibra)
+    expect(screen.getByText('40g')).toBeInTheDocument(); // Carbohidratos
+    expect(screen.getByText('6g')).toBeInTheDocument(); // Fibra
   });
 
-  it('debería filtrar alimentos por categoría', () => {
+  it('debería permitir cambiar la fecha', () => {
     render(
       <BrowserRouter>
         <FoodTrackingScreen />
       </BrowserRouter>
     );
     
-    // Verificar que inicialmente se muestran ambos alimentos
-    expect(screen.getByText('Manzana')).toBeInTheDocument();
-    expect(screen.getByText('Arroz blanco')).toBeInTheDocument();
+    const dateInput = screen.getByLabelText('Fecha:') as HTMLInputElement;
+    fireEvent.change(dateInput, { target: { value: '2023-01-01' } });
     
-    // Filtrar por categoría "frutas" - obtener todos los botones y seleccionar el de categoría
-    const allFrutasButtons = screen.queryAllByText('frutas');
-    // El botón de categoría debería tener la clase 'category-btn'
-    const frutasCategoryButton = allFrutasButtons.find(button => 
-      button.parentElement?.classList.contains('category-btn')
-    );
-    
-    if (frutasCategoryButton) {
-      fireEvent.click(frutasCategoryButton);
-      
-      // Verificar que solo se muestra la manzana
-      expect(screen.getByText('Manzana')).toBeInTheDocument();
-      expect(screen.queryByText('Arroz blanco')).not.toBeInTheDocument();
-    }
+    expect(dateInput.value).toBe('2023-01-01');
   });
 
-  it('debería filtrar alimentos por búsqueda', () => {
+  it('debería abrir el modal al hacer clic en "Agregar Alimento"', () => {
     render(
       <BrowserRouter>
         <FoodTrackingScreen />
       </BrowserRouter>
     );
     
-    // Verificar que inicialmente se muestran ambos alimentos
-    expect(screen.getByText('Manzana')).toBeInTheDocument();
-    expect(screen.getByText('Arroz blanco')).toBeInTheDocument();
+    const addButton = screen.getByRole('button', { name: 'Agregar alimento' });
+    fireEvent.click(addButton);
     
-    // Buscar "manzana"
-    const searchInput = screen.getByPlaceholderText('Buscar alimentos...');
-    fireEvent.change(searchInput, { target: { value: 'manzana' } });
-    
-    // Verificar que solo se muestra la manzana
-    expect(screen.getByText('Manzana')).toBeInTheDocument();
-    expect(screen.queryByText('Arroz blanco')).not.toBeInTheDocument();
+    // Verificar que el modal se abre (buscando elementos del modal)
+    expect(screen.getByPlaceholderText('Buscar alimento...')).toBeInTheDocument();
   });
 });

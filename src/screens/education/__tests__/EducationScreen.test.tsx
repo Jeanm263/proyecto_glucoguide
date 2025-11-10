@@ -93,7 +93,7 @@ describe('EducationScreen', () => {
     // Esperar a que se cargue el contenido
     await waitFor(() => {
       expect(screen.getByText('Educación en Diabetes')).toBeInTheDocument();
-      expect(screen.getByText('Inicio')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Volver al inicio' })).toBeInTheDocument();
     });
   });
 
@@ -138,7 +138,7 @@ describe('EducationScreen', () => {
       expect(screen.getByText('Educación en Diabetes')).toBeInTheDocument();
     });
     
-    const backButton = screen.getByText('Inicio');
+    const backButton = screen.getByRole('button', { name: 'Volver al inicio' });
     fireEvent.click(backButton);
     
     expect(mockNavigate).toHaveBeenCalledWith('/home');

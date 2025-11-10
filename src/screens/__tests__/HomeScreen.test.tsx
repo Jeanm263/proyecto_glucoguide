@@ -52,39 +52,37 @@ describe('HomeScreen', () => {
   it('debería renderizar las tarjetas de funcionalidad', () => {
     renderWithProviders(<HomeScreen />);
     
-    expect(screen.getByText('Buscar Alimentos')).toBeInTheDocument();
-    expect(screen.getByText('Seguimiento de Alimentos')).toBeInTheDocument();
-    expect(screen.getByText('Educación')).toBeInTheDocument();
+    // Usar queryAllByText y verificar que hay al menos una coincidencia
+    expect(screen.queryAllByText('Buscar Alimentos').length).toBeGreaterThan(0);
+    expect(screen.queryAllByText('Seguimiento de Alimentos').length).toBeGreaterThan(0);
+    expect(screen.queryAllByText('Educación').length).toBeGreaterThan(0);
   });
 
   it('debería navegar a la pantalla de alimentos cuando se hace clic en la tarjeta correspondiente', () => {
     renderWithProviders(<HomeScreen />);
     
-    const foodCard = screen.getByText('Buscar Alimentos').closest('button');
-    if (foodCard) {
-      fireEvent.click(foodCard);
-      expect(mockNavigate).toHaveBeenCalledWith('/foods');
-    }
+    // Usar aria-label para seleccionar la tarjeta correcta
+    const foodCard = screen.getByRole('button', { name: 'Buscar alimentos y ver información nutricional' });
+    fireEvent.click(foodCard);
+    expect(mockNavigate).toHaveBeenCalledWith('/foods');
   });
 
   it('debería navegar a la pantalla de seguimiento de alimentos cuando se hace clic en la tarjeta correspondiente', () => {
     renderWithProviders(<HomeScreen />);
     
-    const trackingCard = screen.getByText('Seguimiento de Alimentos').closest('button');
-    if (trackingCard) {
-      fireEvent.click(trackingCard);
-      expect(mockNavigate).toHaveBeenCalledWith('/food-tracking');
-    }
+    // Usar aria-label para seleccionar la tarjeta correcta
+    const trackingCard = screen.getByRole('button', { name: 'Registrar y seguir alimentos consumidos' });
+    fireEvent.click(trackingCard);
+    expect(mockNavigate).toHaveBeenCalledWith('/food-tracking');
   });
 
   it('debería navegar a la pantalla de educación cuando se hace clic en la tarjeta correspondiente', () => {
     renderWithProviders(<HomeScreen />);
     
-    const educationCard = screen.getByText('Educación').closest('button');
-    if (educationCard) {
-      fireEvent.click(educationCard);
-      expect(mockNavigate).toHaveBeenCalledWith('/education');
-    }
+    // Usar aria-label para seleccionar la tarjeta correcta
+    const educationCard = screen.getByRole('button', { name: 'Acceder a contenido educativo sobre diabetes' });
+    fireEvent.click(educationCard);
+    expect(mockNavigate).toHaveBeenCalledWith('/education');
   });
 
   it('debería cerrar sesión cuando se hace clic en el botón de cerrar sesión', () => {

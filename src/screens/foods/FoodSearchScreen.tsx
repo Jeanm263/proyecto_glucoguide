@@ -5,6 +5,7 @@ import { FoodDetails } from '../../components/nutrition/FoodDetails';
 import { INITIAL_FOODS, FOOD_CATEGORIES } from '../../constants/foodsData';
 import { useDebounce } from '../../hooks/useDebounce';
 import type { FoodItem } from '../../types/food';
+import { BottomNavigation } from '../../components/common/BottomNavigation';
 
 export const FoodSearchScreen: React.FC = () => {
   const navigate = useNavigate();
@@ -136,11 +137,15 @@ export const FoodSearchScreen: React.FC = () => {
           onClose={() => setSelectedFood(null)}
         />
       )}
+      
+      {/* Bottom Navigation */}
+      <BottomNavigation />
 
       <style>{`
         .foods-page {
           min-height: 100vh;
           background: #f5f7fa;
+          padding-bottom: 80px; /* Espacio para la navegación inferior */
         }
 
         .foods-header {
@@ -325,6 +330,10 @@ export const FoodSearchScreen: React.FC = () => {
 
           .foods-title {
             font-size: 24px;
+          }
+          
+          .foods-page {
+            padding-bottom: 90px; /* Ajustar para navegación móvil */
           }
         }
       `}</style>

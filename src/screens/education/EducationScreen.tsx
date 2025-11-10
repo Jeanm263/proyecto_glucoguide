@@ -8,6 +8,7 @@ import type { EducationContent } from '../../types/education';
 import { educationService } from '../../services/educationService';
 import { USE_MOCK_SERVICE } from '../../config/env';
 import { toastError } from '../../utils/toast';
+import { BottomNavigation } from '../../components/common/BottomNavigation';
 
 type EducationLevel = 'basic' | 'intermediate' | 'advanced';
 
@@ -220,11 +221,15 @@ export const EducationScreen: React.FC = () => {
           onClose={() => setSelectedContent(null)}
         />
       )}
+      
+      {/* Bottom Navigation */}
+      <BottomNavigation />
 
       <style>{`
         .education-page {
           min-height: 100vh;
           background: #f5f7fa;
+          padding-bottom: 80px; /* Espacio para la navegación inferior */
         }
 
         .education-header {
@@ -414,6 +419,10 @@ export const EducationScreen: React.FC = () => {
 
           .education-title {
             font-size: 24px;
+          }
+          
+          .education-page {
+            padding-bottom: 90px; /* Ajustar para navegación móvil */
           }
         }
       `}</style>

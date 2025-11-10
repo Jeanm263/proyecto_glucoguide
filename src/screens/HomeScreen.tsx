@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { toastInfo } from '../utils/toast';
+import { BottomNavigation } from '../components/common/BottomNavigation';
 
 export const HomeScreen: React.FC = () => {
   const navigate = useNavigate();
@@ -118,12 +119,15 @@ export const HomeScreen: React.FC = () => {
           </div>
         </div>
       </div>
+      
+      {/* Bottom Navigation */}
+      <BottomNavigation />
 
       <style>{`
         .home-container {
           min-height: 100vh;
           background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          padding: 40px 20px;
+          padding: 40px 20px 80px 20px; /* Añadido padding inferior para la navegación */
           position: relative;
           overflow: hidden;
         }
@@ -366,6 +370,10 @@ export const HomeScreen: React.FC = () => {
 
           .how-it-works {
             padding: 40px 24px;
+          }
+          
+          .home-container {
+            padding-bottom: 90px; /* Ajustar padding para navegación móvil */
           }
         }
 
