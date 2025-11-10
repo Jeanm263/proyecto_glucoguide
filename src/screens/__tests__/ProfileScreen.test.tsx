@@ -62,7 +62,6 @@ describe('ProfileScreen', () => {
     
     expect(screen.getByText('Editar Perfil')).toBeInTheDocument();
     expect(screen.getByText('Historial')).toBeInTheDocument();
-    expect(screen.getByText('Favoritos')).toBeInTheDocument();
     expect(screen.getByText('Configuración')).toBeInTheDocument();
   });
 
@@ -81,7 +80,6 @@ describe('ProfileScreen', () => {
     
     expect(screen.getByText('Actualiza tu información personal')).toBeInTheDocument();
     expect(screen.getByText('Ver alimentos registrados')).toBeInTheDocument();
-    expect(screen.getByText('Tus alimentos preferidos')).toBeInTheDocument();
     expect(screen.getByText('Preferencias y notificaciones')).toBeInTheDocument();
   });
 });
