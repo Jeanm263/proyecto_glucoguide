@@ -23,7 +23,10 @@ const envSchema = z.object({
 export const validateEnv = () => {
   try {
     // En entorno de test, usar valores por defecto
-    const isTestEnv = typeof process !== 'undefined' && process.env && process.env.NODE_ENV === 'test';
+    const isTestEnv = typeof window === 'undefined' && 
+                      typeof process !== 'undefined' && 
+                      process.env && 
+                      process.env.NODE_ENV === 'test';
     
     if (isTestEnv) {
       return {
@@ -34,8 +37,8 @@ export const validateEnv = () => {
 
     // En entorno de desarrollo/producción, usar valores por defecto o variables de entorno
     const env = envSchema.parse({
-      VITE_API_URL: process.env.VITE_API_URL,
-      VITE_USE_MOCK_SERVICE: process.env.VITE_USE_MOCK_SERVICE,
+      VITE_API_URL: import.meta.env.VITE_API_URL,
+      VITE_USE_MOCK_SERVICE: import.meta.env.VITE_USE_MOCK_SERVICE,
     });
 
     return env;

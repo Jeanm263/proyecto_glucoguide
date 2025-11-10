@@ -99,16 +99,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const register = useCallback(async (data: RegisterData) => {
     try {
       setIsLoading(true);
-      const response: AuthResponse = await authService.register(data);
-      setUser({
-        id: response.user.id,
-        name: response.user.name,
-        email: response.user.email,
-        age: response.user.age,
-        diabetesType: response.user.diabetesType,
-      });
-      toastSuccess('¡Cuenta creada exitosamente! Bienvenido a GlucosaApp');
-      // Después de registrar, redirigir al login para que el usuario inicie sesión
+      await authService.register(data);
+      toastSuccess('¡Cuenta creada exitosamente! Por favor inicia sesión.');
+      // Redirigir al login después del registro
+      window.location.href = '/login';
     } catch (error) {
       const errorMessage = getErrorMessage(error);
       toastError(errorMessage);
@@ -124,6 +118,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const logout = useCallback(() => {
     authService.logout();
     setUser(null);
+    // Redirigir a la página de login
+    window.location.href = '/login';
   }, []);
 
   /**

@@ -86,7 +86,7 @@ export const authService = {
   logout(): void {
     // En el caso de cookies, podríamos hacer una llamada al backend
     // para eliminar la cookie de sesión
-    window.location.href = '/';
+    // La redirección se manejará en el contexto de autenticación
   },
 
   /**

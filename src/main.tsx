@@ -4,6 +4,7 @@ import { Toaster } from "react-hot-toast";
 import App from "./App";
 import "./index.css";
 import { validateEnv } from "./config/env";
+import { AuthProvider } from "./contexts/AuthContext";
 
 // Validar variables de entorno al iniciar la aplicación
 try {
@@ -22,7 +23,9 @@ try {
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <App />
-    <Toaster />
+    <AuthProvider>
+      <App />
+      <Toaster />
+    </AuthProvider>
   </React.StrictMode>
 );

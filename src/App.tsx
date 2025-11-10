@@ -5,28 +5,14 @@ import { EducationScreen } from './screens/education/EducationScreen';
 import { LoginScreen } from './screens/auth/LoginScreen';
 import { RegisterScreen } from './screens/auth/RegisterScreen';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
-import { authService } from './services/authService';
-import { useEffect, useState } from 'react';
+import { useAuth } from './contexts/AuthContext';
 
-// CI/CD verification change - trigger workflow
+// Default redirect based on authentication context
 const DefaultRedirect = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const { isAuthenticated, isLoading } = useAuth();
 
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const authStatus = await authService.isAuthenticated();
-        setIsAuthenticated(authStatus);
-      } catch {
-        setIsAuthenticated(false);
-      }
-    };
-
-    checkAuth();
-  }, []);
-
-  if (isAuthenticated === null) {
-    return null; // Or a loading spinner
+  if (isLoading) {
+    return null; // Let AuthProvider handle loading state
   }
 
   return isAuthenticated ? <Navigate to="/home" replace /> : <Navigate to="/login" replace />;

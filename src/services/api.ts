@@ -39,7 +39,8 @@ apiClient.interceptors.response.use(
         case 401:
           // No autorizado - sesión expirada
           localStorage.removeItem('authToken');
-          window.location.href = '/login';
+          // No redirigir automáticamente para evitar bucles
+          // La redirección se manejará en el contexto de autenticación
           break;
         case 403:
           // Prohibido
