@@ -22,5 +22,8 @@ export default {
   setupFilesAfterEnv: ['<rootDir>/src/setupTests.ts'],
   setupFiles: ['<rootDir>/src/testSetup.js'],
   resetMocks: true,
-  restoreMocks: true
+  restoreMocks: true,
+  transformIgnorePatterns: [
+    '/node_modules/(?!msw).+\\.js$'
+  ]
 };

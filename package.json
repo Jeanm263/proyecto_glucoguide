@@ -9,11 +9,18 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "jest",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "build:android": "npm run build && npx cap add android && npx cap copy android",
+    "open:android": "npx cap open android",
+    "build:apk": "cd android && ./gradlew assembleDebug"
   },
   "dependencies": {
+    "@capacitor/android": "^7.4.4",
+    "@capacitor/cli": "^7.4.4",
+    "@capacitor/core": "^7.4.4",
     "@hookform/resolvers": "^5.2.2",
     "axios": "^1.13.1",
+    "loglevel": "^1.9.2",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-hook-form": "^7.66.0",
@@ -40,6 +47,8 @@
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^30.2.0",
     "jsdom": "^27.1.0",
+    "msw": "^2.12.1",
+    "sharp": "^0.34.5",
     "ts-jest": "^29.2.5",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.45.0",

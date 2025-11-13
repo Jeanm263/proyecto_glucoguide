@@ -1,18 +1,14 @@
 {
-  "extends": "./tsconfig.app.json",
+  "extends": "./tsconfig.json",
   "compilerOptions": {
     "jsx": "react-jsx",
+    "module": "commonjs",
+    "target": "es2020",
     "esModuleInterop": true,
-    "verbatimModuleSyntax": false,
-    "types": ["jest", "node", "@testing-library/jest-dom"],
-    "module": "ESNext",
-    "moduleResolution": "node",
-    "allowSyntheticDefaultImports": true
+    "skipLibCheck": true,
+    "moduleResolution": "node"
   },
   "include": [
-    "src/**/*",
-    "src/**/*.test.ts",
-    "src/**/*.test.tsx",
-    "src/__mocks__/**/*"
+    "src/**/*"
   ]
 }
