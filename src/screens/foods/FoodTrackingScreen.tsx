@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BottomNavigation } from '../../components/common/BottomNavigation';
 import { AddFoodModal } from '../../components/nutrition/AddFoodModal';
@@ -19,12 +19,7 @@ export const FoodTrackingScreen: React.FC = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // Cargar registros de alimentos al montar el componente y cuando cambia la fecha
-  useEffect(() => {
-    loadFoodEntries();
-  }, [selectedDate]);
-
-  const loadFoodEntries = async () => {
+  const loadFoodEntries = useCallback(async () => {
     setLoading(true);
     try {
       // Cargar registros del localStorage
@@ -40,7 +35,12 @@ export const FoodTrackingScreen: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedDate]);
+
+  // Cargar registros de alimentos al montar el componente y cuando cambia la fecha
+  useEffect(() => {
+    loadFoodEntries();
+  }, [selectedDate, loadFoodEntries]);
 
   const saveFoodEntries = (entries: FoodEntry[]) => {
     try {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { GlucoseForm } from '../components/glucose/GlucoseForm';
 import { GlucoseStats } from '../components/glucose/GlucoseStats';
 import { glucoseService } from '../services/glucoseService';
@@ -11,11 +11,7 @@ export const GlucoseScreen: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [timeRange, setTimeRange] = useState(30);
 
-  useEffect(() => {
-    fetchReadings();
-  }, [timeRange]);
-
-  const fetchReadings = async () => {
+  const fetchReadings = useCallback(async () => {
     try {
       setLoading(true);
       const data = await glucoseService.getReadings({ 
@@ -29,7 +25,11 @@ export const GlucoseScreen: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [timeRange]);
+
+  useEffect(() => {
+    fetchReadings();
+  }, [timeRange, fetchReadings]);
 
   const handleReadingAdded = () => {
     fetchReadings();

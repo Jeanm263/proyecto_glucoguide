@@ -33,7 +33,7 @@ export const RegisterScreen: React.FC = () => {
       registerSchema.parse(formData);
       
       // Preparar datos para registro (excluir confirmPassword)
-      const { confirmPassword: _, ...registerData } = formData;
+      const { confirmPassword: _, ...registerData } = formData; // eslint-disable-line @typescript-eslint/no-unused-vars
       
       await registerUser(registerData);
     } catch (error) {

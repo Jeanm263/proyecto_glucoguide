@@ -13,10 +13,17 @@ interface UserAction {
   timestamp: number;
 }
 
+interface ErrorLog {
+  error: string;
+  stack?: string;
+  context?: string;
+  timestamp: number;
+}
+
 class MonitoringService {
   private performanceMetrics: PerformanceMetric[] = [];
   private userActions: UserAction[] = [];
-  private errorLogs: any[] = [];
+  private errorLogs: ErrorLog[] = [];
 
   // Registrar métricas de rendimiento
   public recordPerformanceMetric(name: string, value: number): void {
@@ -55,9 +62,9 @@ class MonitoringService {
   }
 
   // Registrar errores
-  public recordError(error: any, context?: string): void {
-    const errorLog = {
-      error: error.message || error,
+  public recordError(error: Error, context?: string): void {
+    const errorLog: ErrorLog = {
+      error: error.message,
       stack: error.stack,
       context,
       timestamp: Date.now()
@@ -71,7 +78,7 @@ class MonitoringService {
     }
     
     logger.error('Error registrado', { 
-      message: error.message || error,
+      message: error.message,
       context,
       stack: error.stack
     });
@@ -103,7 +110,9 @@ class MonitoringService {
       const duration = endTime - startTime;
       
       this.recordPerformanceMetric(`${endpoint}_response_time`, duration);
-      this.recordError(error, `API call to ${endpoint}`);
+      if (error instanceof Error) {
+        this.recordError(error, `API call to ${endpoint}`);
+      }
       
       throw error;
     }
@@ -120,7 +129,7 @@ class MonitoringService {
   }
 
   // Obtener logs de errores
-  public getErrorLogs(): any[] {
+  public getErrorLogs(): ErrorLog[] {
     return [...this.errorLogs];
   }
 
@@ -139,7 +148,9 @@ class MonitoringService {
       this.userActions = [];
       this.errorLogs = [];
     } catch (error) {
-      logger.error('Error al enviar métricas al backend', error);
+      if (error instanceof Error) {
+        logger.error('Error al enviar métricas al backend', error);
+      }
     }
   }
 
