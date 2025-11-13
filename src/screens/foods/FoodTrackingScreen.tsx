@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BottomNavigation } from '../../components/common/BottomNavigation';
 import { AddFoodModal } from '../../components/nutrition/AddFoodModal';
@@ -15,45 +15,40 @@ interface FoodEntry {
 export const FoodTrackingScreen: React.FC = () => {
   const navigate = useNavigate();
   const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
-  const [foodEntries, setFoodEntries] = useState<FoodEntry[]>([
-    {
-      id: '1',
-      food: {
-        id: 'apple-1',
-        name: 'Manzana',
-        category: 'frutas',
-        glycemicIndex: 38,
-        carbohydrates: 25,
-        fiber: 4,
-        sugars: 19,
-        portion: '1 unidad mediana (182g)',
-        trafficLight: 'green',
-        commonNames: ['manzana roja', 'manzana verde', 'apple']
-      },
-      portion: '1 unidad mediana',
-      time: '08:30',
-      date: new Date().toISOString().split('T')[0]
-    },
-    {
-      id: '2',
-      food: {
-        id: 'bread-1',
-        name: 'Pan integral',
-        category: 'cereales',
-        glycemicIndex: 55,
-        carbohydrates: 15,
-        fiber: 2,
-        sugars: 2,
-        portion: '2 rebanadas (60g)',
-        trafficLight: 'yellow',
-        commonNames: ['pan integral', 'whole wheat bread']
-      },
-      portion: '2 rebanadas',
-      time: '13:15',
-      date: new Date().toISOString().split('T')[0]
-    }
-  ]);
+  const [foodEntries, setFoodEntries] = useState<FoodEntry[]>([]);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  // Cargar registros de alimentos al montar el componente y cuando cambia la fecha
+  useEffect(() => {
+    loadFoodEntries();
+  }, [selectedDate]);
+
+  const loadFoodEntries = async () => {
+    setLoading(true);
+    try {
+      // Cargar registros del localStorage
+      const storedEntries = localStorage.getItem('foodEntries');
+      const entries: FoodEntry[] = storedEntries ? JSON.parse(storedEntries) : [];
+      
+      // Filtrar por fecha seleccionada
+      const filteredEntries = entries.filter(entry => entry.date === selectedDate);
+      setFoodEntries(filteredEntries);
+    } catch (error) {
+      console.error('Error loading food entries:', error);
+      setFoodEntries([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const saveFoodEntries = (entries: FoodEntry[]) => {
+    try {
+      localStorage.setItem('foodEntries', JSON.stringify(entries));
+    } catch (error) {
+      console.error('Error saving food entries:', error);
+    }
+  };
 
   const handleAddFood = (food: FoodItem, portion: string, time: string) => {
     const newEntry: FoodEntry = {
@@ -63,11 +58,26 @@ export const FoodTrackingScreen: React.FC = () => {
       time,
       date: selectedDate // Usar la fecha seleccionada
     };
-    setFoodEntries(prev => [...prev, newEntry]);
+    
+    const updatedEntries = [...foodEntries, newEntry];
+    setFoodEntries(updatedEntries);
+    
+    // Guardar en localStorage
+    const allEntries = localStorage.getItem('foodEntries');
+    const existingEntries: FoodEntry[] = allEntries ? JSON.parse(allEntries) : [];
+    const newEntries = [...existingEntries, newEntry];
+    saveFoodEntries(newEntries);
   };
 
   const handleDeleteFood = (id: string) => {
-    setFoodEntries(prev => prev.filter(entry => entry.id !== id));
+    const updatedEntries = foodEntries.filter(entry => entry.id !== id);
+    setFoodEntries(updatedEntries);
+    
+    // Actualizar en localStorage
+    const allEntries = localStorage.getItem('foodEntries');
+    const existingEntries: FoodEntry[] = allEntries ? JSON.parse(allEntries) : [];
+    const newEntries = existingEntries.filter(entry => entry.id !== id);
+    saveFoodEntries(newEntries);
   };
 
   const totalCarbs = foodEntries
@@ -163,7 +173,12 @@ export const FoodTrackingScreen: React.FC = () => {
         <div className="entries-section">
           <h2 className="entries-title">Alimentos de hoy</h2>
           
-          {filteredEntries.length === 0 ? (
+          {loading ? (
+            <div className="loading-state">
+              <div className="loading-spinner">⏳</div>
+              <p className="loading-message">Cargando registros...</p>
+            </div>
+          ) : filteredEntries.length === 0 ? (
             <div className="empty-state">
               <div className="empty-icon">🍽️</div>
               <p className="empty-message">No has registrado alimentos hoy</p>
@@ -199,6 +214,9 @@ export const FoodTrackingScreen: React.FC = () => {
                             </span>
                             <span className="nutrition-item">
                               Fibra: <strong>{formatTrafficLight(entry.food.fiber, 5)} {entry.food.fiber}g</strong>
+                            </span>
+                            <span className="nutrition-item">
+                              Azúcares: <strong>{formatTrafficLight(entry.food.sugars, 10)} {entry.food.sugars}g</strong>
                             </span>
                           </div>
                           <div className="entry-category">
@@ -392,6 +410,28 @@ export const FoodTrackingScreen: React.FC = () => {
           margin: 0 0 20px 0;
         }
 
+        .loading-state {
+          text-align: center;
+          padding: 40px 20px;
+        }
+
+        .loading-spinner {
+          font-size: 40px;
+          margin-bottom: 16px;
+          animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+
+        .loading-message {
+          font-size: 16px;
+          color: #666;
+          margin: 0;
+        }
+
         .time-group {
           margin-bottom: 24px;
         }
@@ -491,6 +531,7 @@ export const FoodTrackingScreen: React.FC = () => {
 
         .entry-nutrition {
           display: flex;
+          flex-wrap: wrap;
           gap: 16px;
           margin-top: 4px;
         }
@@ -532,6 +573,26 @@ export const FoodTrackingScreen: React.FC = () => {
         .category-tag.proteinas {
           background: rgba(156, 39, 176, 0.1);
           color: #9c27b0;
+        }
+
+        .category-tag.lacteos {
+          background: rgba(255, 152, 0, 0.1);
+          color: #ff9800;
+        }
+
+        .category-tag.grasas {
+          background: rgba(121, 85, 72, 0.1);
+          color: #795548;
+        }
+
+        .category-tag.endulzantes {
+          background: rgba(244, 67, 54, 0.1);
+          color: #f44336;
+        }
+
+        .category-tag.legumbres {
+          background: rgba(139, 195, 74, 0.1);
+          color: #8bc34a;
         }
 
         .glycemic-index {

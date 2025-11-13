@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import type { FoodItem } from '../../types/food';
-import { INITIAL_FOODS } from '../../constants/foodsData';
+import { foodService } from '../../services/foodService';
 
 interface AddFoodModalProps {
   onClose: () => void;
@@ -13,12 +13,30 @@ export const AddFoodModal: React.FC<AddFoodModalProps> = ({ onClose, onAdd }) =>
   const [time, setTime] = useState<string>(new Date().toTimeString().slice(0, 5));
   const [searchQuery, setSearchQuery] = useState('');
   const [showFoodList, setShowFoodList] = useState(false);
+  const [filteredFoods, setFilteredFoods] = useState<FoodItem[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  // Filtrar alimentos según la búsqueda
-  const filteredFoods = INITIAL_FOODS.filter(food => 
-    food.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    food.commonNames.some(name => name.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
+  // Cargar alimentos cuando se abre el modal
+  useEffect(() => {
+    const loadFoods = async () => {
+      if (showFoodList && searchQuery) {
+        setLoading(true);
+        try {
+          const foods = await foodService.searchFoods(searchQuery);
+          setFilteredFoods(foods);
+        } catch (error) {
+          console.error('Error loading foods:', error);
+          setFilteredFoods([]);
+        } finally {
+          setLoading(false);
+        }
+      } else {
+        setFilteredFoods([]);
+      }
+    };
+
+    loadFoods();
+  }, [showFoodList, searchQuery]);
 
   const handleFoodSelect = (food: FoodItem) => {
     setSelectedFood(food);
@@ -71,10 +89,12 @@ export const AddFoodModal: React.FC<AddFoodModalProps> = ({ onClose, onAdd }) =>
               
               {showFoodList && searchQuery && (
                 <div className="food-dropdown">
-                  {filteredFoods.length > 0 ? (
-                    filteredFoods.map(food => (
+                  {loading ? (
+                    <div className="loading-message">Buscando alimentos...</div>
+                  ) : filteredFoods.length > 0 ? (
+                    filteredFoods.map((food, index) => (
                       <div
-                        key={food.id}
+                        key={`${food.id || food.name}-${food.category}-${index}-${Date.now()}`}
                         className="food-option"
                         onClick={() => handleFoodSelect(food)}
                       >
@@ -120,10 +140,22 @@ export const AddFoodModal: React.FC<AddFoodModalProps> = ({ onClose, onAdd }) =>
                     </span>
                   </div>
                   <div className="nutrition-item">
+                    <span className="nutrition-label">Azúcares:</span>
+                    <span className="nutrition-value">
+                      {formatTrafficLight(selectedFood.sugars, 10)} {selectedFood.sugars}g
+                    </span>
+                  </div>
+                  <div className="nutrition-item">
                     <span className="nutrition-label">Índice Glucémico:</span>
                     <span className="nutrition-value">
                       {selectedFood.glycemicIndex <= 55 ? '🟢 Bajo' : 
-                       selectedFood.glycemicIndex <= 70 ? '🟡 Medio' : '🔴 Alto'}
+                       selectedFood.glycemicIndex <= 70 ? '🟡 Medio' : '🔴 Alto'} ({selectedFood.glycemicIndex})
+                    </span>
+                  </div>
+                  <div className="nutrition-item">
+                    <span className="nutrition-label">Porción recomendada:</span>
+                    <span className="nutrition-value">
+                      {selectedFood.portion}
                     </span>
                   </div>
                 </div>
@@ -142,6 +174,11 @@ export const AddFoodModal: React.FC<AddFoodModalProps> = ({ onClose, onAdd }) =>
               className="form-input"
               required
             />
+            {selectedFood && (
+              <div className="portion-hint">
+                Porción recomendada: {selectedFood.portion}
+              </div>
+            )}
           </div>
 
           {/* Hora */}
@@ -318,7 +355,7 @@ export const AddFoodModal: React.FC<AddFoodModalProps> = ({ onClose, onAdd }) =>
             color: #666;
           }
 
-          .no-results {
+          .no-results, .loading-message {
             padding: 16px;
             text-align: center;
             color: #999;
@@ -375,6 +412,26 @@ export const AddFoodModal: React.FC<AddFoodModalProps> = ({ onClose, onAdd }) =>
             color: #9c27b0;
           }
 
+          .category-tag.lacteos {
+            background: rgba(255, 152, 0, 0.1);
+            color: #ff9800;
+          }
+
+          .category-tag.grasas {
+            background: rgba(121, 85, 72, 0.1);
+            color: #795548;
+          }
+
+          .category-tag.endulzantes {
+            background: rgba(244, 67, 54, 0.1);
+            color: #f44336;
+          }
+
+          .category-tag.legumbres {
+            background: rgba(139, 195, 74, 0.1);
+            color: #8bc34a;
+          }
+
           .food-preview-nutrition {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -395,6 +452,13 @@ export const AddFoodModal: React.FC<AddFoodModalProps> = ({ onClose, onAdd }) =>
           .nutrition-value {
             color: #333;
             font-weight: 600;
+          }
+
+          .portion-hint {
+            margin-top: 8px;
+            font-size: 14px;
+            color: #666;
+            font-style: italic;
           }
 
           .modal-actions {

@@ -1,53 +1,85 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { foodService } from '../../services/foodService';
 import { FoodCard } from '../../components/nutrition/FoodCard';
 import { FoodDetails } from '../../components/nutrition/FoodDetails';
-import { INITIAL_FOODS, FOOD_CATEGORIES } from '../../constants/foodsData';
-import { useDebounce } from '../../hooks/useDebounce';
 import type { FoodItem } from '../../types/food';
 import { BottomNavigation } from '../../components/common/BottomNavigation';
+import { useDebounce } from '../../hooks/useDebounce';
+import { LoadingScreen } from '../../components/common/LoadingScreen';
+import { toastError } from '../../utils/toast';
 
 export const FoodSearchScreen: React.FC = () => {
   const navigate = useNavigate();
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('todas');
+  const [foods, setFoods] = useState<FoodItem[]>([]);
+  const [categories, setCategories] = useState<string[]>(['todas']);
+  const [loading, setLoading] = useState(false);
+  const [initialLoad, setInitialLoad] = useState(true);
   const [selectedFood, setSelectedFood] = useState<FoodItem | null>(null);
+  
+  const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
-  // Debounce del search query para mejorar performance
-  // Solo ejecuta el filtrado 300ms después de que el usuario deje de escribir
-  const debouncedSearchQuery = useDebounce(searchQuery, 300);
-
-  // Memoizar el callback para evitar re-crear la función en cada render
-  // Esto permite que React.memo en FoodCard funcione correctamente
-  const handleFoodPress = useCallback((food: FoodItem) => {
-    setSelectedFood(food);
+  const loadCategories = useCallback(async () => {
+    try {
+      const fetchedCategories = await foodService.getFoodCategories();
+      setCategories(['todas', ...fetchedCategories]);
+    } catch (error) {
+      console.error('Error loading categories:', error);
+      toastError('Error al cargar categorías');
+    }
   }, []);
 
-  const filteredFoods = useMemo(() => {
-    let foods = INITIAL_FOODS;
-
-    // Filter by category
-    if (selectedCategory !== 'todas') {
-      foods = foods.filter(food => food.category === selectedCategory);
+  const loadFoods = useCallback(async () => {
+    setLoading(true);
+    try {
+      let results: FoodItem[] = [];
+      
+      if (debouncedSearchTerm || selectedCategory !== 'todas') {
+        // Usar búsqueda cuando hay término o categoría seleccionada
+        results = await foodService.searchFoods(
+          debouncedSearchTerm || undefined,
+          selectedCategory !== 'todas' ? selectedCategory : undefined
+        );
+      } else {
+        // Cargar todos los alimentos si no hay filtros
+        results = await foodService.getAllFoods();
+      }
+      
+      setFoods(results);
+    } catch (error) {
+      console.error('Error loading foods:', error);
+      toastError('Error al cargar alimentos');
+      setFoods([]);
+    } finally {
+      setLoading(false);
+      setInitialLoad(false);
     }
+  }, [debouncedSearchTerm, selectedCategory]);
 
-    // Filter by search query (usando el valor debounced)
-    if (debouncedSearchQuery) {
-      const query = debouncedSearchQuery.toLowerCase();
-      foods = foods.filter(food =>
-        food.name.toLowerCase().includes(query) ||
-        food.commonNames.some(name => name.toLowerCase().includes(query))
-      );
-    }
+  useEffect(() => {
+    loadCategories();
+  }, [loadCategories]);
 
-    return foods;
-  }, [debouncedSearchQuery, selectedCategory]);
+  useEffect(() => {
+    loadFoods();
+  }, [loadFoods]);
+
+  const handleFoodSelect = (food: FoodItem) => {
+    // Mostrar detalles del alimento en un modal
+    setSelectedFood(food);
+  };
+
+  const closeFoodDetails = () => {
+    setSelectedFood(null);
+  };
 
   return (
-    <div className="foods-page">
+    <div className="food-search-page">
       {/* Header */}
-      <header className="foods-header">
-        <div className="foods-header-content">
+      <header className="food-search-header">
+        <div className="food-search-header-content">
           <button
             onClick={() => navigate('/home')}
             className="btn-back"
@@ -55,78 +87,89 @@ export const FoodSearchScreen: React.FC = () => {
           >
             <span aria-hidden="true">←</span> Inicio
           </button>
-          <h1 className="foods-title">
-            <span aria-hidden="true">🍎</span> Buscar Alimentos
+          <h1 className="food-search-title">
+            <span aria-hidden="true">🔍</span> Buscar Alimentos
           </h1>
         </div>
       </header>
 
-      {/* Content */}
-      <div className="foods-content fade-in">
-        {/* Search and Filters */}
-        <div className="search-card" role="search">
-          <label htmlFor="food-search-input" className="sr-only">
-            Buscar alimentos
-          </label>
+      {/* Search and Filters */}
+      <div className="search-filters">
+        <div className="search-container">
           <input
-            id="food-search-input"
             type="text"
-            placeholder="Buscar alimentos... (ej: manzana, arroz, pan)"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Buscar alimentos..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
             className="search-input"
-            aria-label="Buscar alimentos por nombre"
-            aria-describedby="food-search-hint"
+            aria-label="Buscar alimentos"
           />
-          <span id="food-search-hint" className="sr-only">
-            Escribe el nombre del alimento que deseas buscar
-          </span>
+          <button 
+            className="clear-search"
+            onClick={() => setSearchTerm('')}
+            aria-label="Limpiar búsqueda"
+          >
+            ✕
+          </button>
+        </div>
 
-          <div className="category-filters" role="group" aria-label="Filtros por categoría">
-            {FOOD_CATEGORIES.map(category => (
-              <button
-                key={category}
-                onClick={() => setSelectedCategory(category)}
-                className={`category-btn ${selectedCategory === category ? 'active' : ''}`}
-                aria-pressed={selectedCategory === category}
-                aria-label={`Filtrar por categoría: ${category}`}
-              >
-                {category}
-              </button>
+        <div className="category-filter">
+          <label htmlFor="category-select" className="category-label">
+            Categoría:
+          </label>
+          <select
+            id="category-select"
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}
+            className="category-select"
+          >
+            {categories.map((category) => (
+              <option key={category} value={category}>
+                {category.charAt(0).toUpperCase() + category.slice(1)}
+              </option>
             ))}
-          </div>
+          </select>
         </div>
+      </div>
 
-        {/* Results Header */}
-        <div className="results-header">
-          <h2 className="results-title" id="results-heading">
-            Resultados{' '}
-            {filteredFoods.length > 0 && (
-              <span className="results-count" aria-label={`${filteredFoods.length} alimentos encontrados`}>
-                ({filteredFoods.length})
-              </span>
-            )}
-          </h2>
-        </div>
-
-        {/* Results */}
-        {filteredFoods.length === 0 ? (
-          <div className="empty-state">
-            <div className="empty-icon">🔍</div>
-            <p className="empty-message">No se encontraron alimentos con esos criterios</p>
-            <p className="empty-hint">Intenta con otros términos o cambia la categoría</p>
-          </div>
+      {/* Results */}
+      <div className="food-search-content fade-in">
+        {initialLoad && loading ? (
+          <LoadingScreen />
         ) : (
-          <div className="foods-grid" role="list" aria-labelledby="results-heading">
-            {filteredFoods.map(food => (
-              <div key={food.id} role="listitem">
-                <FoodCard
-                  food={food}
-                  onPress={() => handleFoodPress(food)}
-                />
+          <>
+            <div className="results-header">
+              <p className="results-count">
+                {foods.length} {foods.length === 1 ? 'alimento encontrado' : 'alimentos encontrados'}
+              </p>
+            </div>
+
+            {foods.length === 0 && !loading ? (
+              <div className="empty-state">
+                <div className="empty-icon">🍽️</div>
+                <p className="empty-message">
+                  {searchTerm || selectedCategory !== 'todas' 
+                    ? 'No se encontraron alimentos que coincidan con tu búsqueda' 
+                    : 'No hay alimentos disponibles'}
+                </p>
+                <p className="empty-hint">
+                  {searchTerm || selectedCategory !== 'todas' 
+                    ? 'Intenta con otros términos de búsqueda' 
+                    : 'Los alimentos aparecerán aquí cuando estén disponibles'}
+                </p>
               </div>
-            ))}
-          </div>
+            ) : (
+              <div className="food-grid">
+                {foods.map((food, index) => (
+                  <FoodCard
+                    key={food.id || `${food.name}-${food.category}-${index}-${Date.now()}`}
+                    food={food}
+                    onPress={() => handleFoodSelect(food)}
+                  />
+                ))}
+              </div>
+            )}
+          </>
         )}
       </div>
 
@@ -134,27 +177,27 @@ export const FoodSearchScreen: React.FC = () => {
       {selectedFood && (
         <FoodDetails
           food={selectedFood}
-          onClose={() => setSelectedFood(null)}
+          onClose={closeFoodDetails}
         />
       )}
-      
+
       {/* Bottom Navigation */}
       <BottomNavigation />
 
       <style>{`
-        .foods-page {
+        .food-search-page {
           min-height: 100vh;
           background: #f5f7fa;
-          padding-bottom: 80px; /* Espacio para la navegación inferior */
+          padding-bottom: 80px;
         }
 
-        .foods-header {
+        .food-search-header {
           background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
           padding: 24px 20px;
           box-shadow: 0 2px 12px rgba(0,0,0,0.1);
         }
 
-        .foods-header-content {
+        .food-search-header-content {
           max-width: 1200px;
           margin: 0 auto;
           display: flex;
@@ -180,7 +223,7 @@ export const FoodSearchScreen: React.FC = () => {
           transform: translateX(-2px);
         }
 
-        .foods-title {
+        .food-search-title {
           margin: 0;
           font-size: 32px;
           font-weight: 700;
@@ -188,152 +231,173 @@ export const FoodSearchScreen: React.FC = () => {
           text-shadow: 0 2px 8px rgba(0,0,0,0.2);
         }
 
-        .foods-content {
+        .search-filters {
           max-width: 1200px;
           margin: 0 auto;
-          padding: 30px 20px;
+          padding: 20px;
+          display: flex;
+          flex-wrap: wrap;
+          gap: 16px;
+          background: white;
+          box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
 
-        .search-card {
-          background: white;
-          border-radius: 20px;
-          padding: 32px;
-          margin-bottom: 30px;
-          box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+        .search-container {
+          flex: 1;
+          min-width: 250px;
+          position: relative;
         }
 
         .search-input {
           width: 100%;
-          padding: 16px 20px;
-          font-size: 16px;
+          padding: 14px 45px 14px 16px;
           border: 2px solid #e0e0e0;
-          border-radius: 16px;
+          border-radius: 12px;
+          font-size: 16px;
           outline: none;
           transition: all 0.3s ease;
-          background: #fafafa;
-          margin-bottom: 20px;
-          box-sizing: border-box;
         }
 
         .search-input:focus {
           border-color: #667eea;
-          background: white;
-          box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+          box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
 
-        .category-filters {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 12px;
-        }
-
-        .category-btn {
-          padding: 10px 20px;
-          border-radius: 20px;
-          border: 2px solid #e0e0e0;
-          background: white;
-          color: #666;
+        .clear-search {
+          position: absolute;
+          right: 12px;
+          top: 50%;
+          transform: translateY(-50%);
+          background: none;
+          border: none;
+          font-size: 18px;
+          color: #999;
           cursor: pointer;
-          font-size: 14px;
+          padding: 4px;
+          border-radius: 50%;
+          transition: all 0.2s ease;
+        }
+
+        .clear-search:hover {
+          background: #f0f0f0;
+          color: #666;
+        }
+
+        .category-filter {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .category-label {
           font-weight: 600;
-          text-transform: capitalize;
+          color: #333;
+          font-size: 14px;
+          white-space: nowrap;
+        }
+
+        .category-select {
+          padding: 12px 16px;
+          border: 2px solid #e0e0e0;
+          border-radius: 12px;
+          font-size: 14px;
+          outline: none;
           transition: all 0.3s ease;
+          background: white;
+          min-width: 150px;
         }
 
-        .category-btn:hover {
+        .category-select:focus {
           border-color: #667eea;
-          color: #667eea;
+          box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
 
-        .category-btn.active {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          color: white;
-          border-color: transparent;
-          transform: translateY(-2px);
-          box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-        }
-
-        .category-btn:focus {
-          outline: 3px solid #667eea;
-          outline-offset: 2px;
+        .food-search-content {
+          max-width: 1200px;
+          margin: 0 auto;
+          padding: 20px;
         }
 
         .results-header {
-          margin-bottom: 24px;
-        }
-
-        .results-title {
-          font-size: 28px;
-          font-weight: 700;
-          color: #333;
-          margin: 0;
+          margin-bottom: 20px;
         }
 
         .results-count {
-          color: #667eea;
-          font-weight: 600;
+          font-size: 16px;
+          color: #666;
+          font-weight: 500;
+          margin: 0;
         }
 
-        .foods-grid {
+        .food-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-          gap: 24px;
-        }
-
-        .sr-only {
-          position: absolute;
-          width: 1px;
-          height: 1px;
-          padding: 0;
-          margin: -1px;
-          overflow: hidden;
-          clip: rect(0, 0, 0, 0);
-          white-space: nowrap;
-          border-width: 0;
+          grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+          gap: 20px;
         }
 
         .empty-state {
-          background: white;
-          border-radius: 20px;
-          padding: 80px 40px;
           text-align: center;
-          box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+          padding: 60px 20px;
         }
 
         .empty-icon {
-          font-size: 80px;
-          margin-bottom: 24px;
+          font-size: 60px;
+          margin-bottom: 16px;
           opacity: 0.5;
         }
 
         .empty-message {
-          font-size: 20px;
+          font-size: 18px;
           font-weight: 600;
           color: #333;
-          margin: 0 0 12px 0;
+          margin: 0 0 8px 0;
         }
 
         .empty-hint {
-          font-size: 16px;
+          font-size: 14px;
           color: #999;
           margin: 0;
         }
 
         @media (max-width: 768px) {
-          .foods-grid {
-            grid-template-columns: 1fr;
+          .food-search-header-content {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 16px;
           }
 
-          .search-card {
-            padding: 24px 20px;
-          }
-
-          .foods-title {
+          .food-search-title {
             font-size: 24px;
           }
-          
-          .foods-page {
-            padding-bottom: 90px; /* Ajustar para navegación móvil */
+
+          .search-filters {
+            flex-direction: column;
+          }
+
+          .category-filter {
+            width: 100%;
+          }
+
+          .category-select {
+            flex: 1;
+          }
+
+          .food-grid {
+            grid-template-columns: 1fr;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .food-search-page {
+            padding-bottom: 90px;
+          }
+
+          .search-filters {
+            padding: 16px;
+          }
+
+          .food-search-content {
+            padding: 16px;
           }
         }
       `}</style>
