@@ -1,9 +1,10 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useState, useEffect, useCallback } from 'react';
 import { authService, type AuthResponse, type LoginCredentials, type RegisterData, type User } from '../services/authService';
 import { USE_MOCK_SERVICE } from '../config/env';
 import { toastError, toastSuccess, getErrorMessage } from '../utils/toast';
+import logger from '../utils/logger';
 
-interface AuthContextType {
+export interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
@@ -14,18 +15,6 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-/**
- * Hook para usar el contexto de autenticación
- * @throws Error si se usa fuera de AuthProvider
- */
-export const useAuth = (): AuthContextType => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth debe ser usado dentro de un AuthProvider');
-  }
-  return context;
-};
 
 interface AuthProviderProps {
   children: React.ReactNode;
@@ -50,12 +39,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       
       if (!USE_MOCK_SERVICE && !isTestEnv) {
         try {
-          console.log('Checking authentication status...');
+          logger.debug('Verificando estado de autenticación al iniciar la aplicación');
           const isAuthenticated = await authService.isAuthenticated();
-          console.log('Authentication check result:', isAuthenticated);
+          logger.debug('Resultado de verificación de autenticación:', isAuthenticated);
           if (isAuthenticated) {
             const currentUser = await authService.getCurrentUser();
-            console.log('Current user:', currentUser);
+            logger.debug('Usuario actual obtenido:', { userId: currentUser.id, email: currentUser.email });
             setUser({
               id: currentUser.id,
               name: currentUser.name,
@@ -64,21 +53,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
               diabetesType: currentUser.diabetesType,
             });
           } else {
-            console.log('User is not authenticated, setting user to null');
+            logger.debug('Usuario no autenticado, estableciendo user a null');
             setUser(null);
           }
         } catch (error) {
           // Si no hay sesión activa, el error es esperado
-          console.log('No active session found, user is not authenticated:', error);
+          logger.debug('No se encontró sesión activa:', error);
           setUser(null);
         } finally {
           // Siempre establecer isLoading a false después de verificar la autenticación
-          console.log('Finished authentication check, setting isLoading to false');
+          logger.debug('Verificación de autenticación completada, estableciendo isLoading a false');
           setIsLoading(false);
         }
       } else {
         // En entorno de pruebas o cuando se usa el servicio mock, establecer isLoading a false inmediatamente
-        console.log('Using mock service or test environment, setting isLoading to false');
+        logger.debug('Usando servicio mock o entorno de pruebas, estableciendo isLoading a false');
         setIsLoading(false);
       }
     };
@@ -92,6 +81,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const login = useCallback(async (credentials: LoginCredentials) => {
     try {
       setIsLoading(true);
+      logger.info('Iniciando proceso de login', { email: credentials.email });
       const response: AuthResponse = await authService.login(credentials);
       setUser({
         id: response.user.id,
@@ -101,8 +91,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         diabetesType: response.user.diabetesType,
       });
       toastSuccess('¡Bienvenido! Inicio de sesión exitoso');
+      logger.info('Login completado exitosamente', { userId: response.user.id, email: response.user.email });
     } catch (error) {
       const errorMessage = getErrorMessage(error);
+      logger.error('Error en login', { 
+        error: error instanceof Error ? error.message : 'Unknown error',
+        email: credentials.email 
+      });
       toastError(errorMessage);
       throw error;
     } finally {
@@ -116,6 +111,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const register = useCallback(async (data: RegisterData) => {
     try {
       setIsLoading(true);
+      logger.info('Iniciando proceso de registro', { email: data.email });
       // Register the user
       await authService.register(data);
       toastSuccess('¡Cuenta creada exitosamente!');
@@ -139,8 +135,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       
       // Redirect to home screen after auto-login
       window.location.href = '/home';
+      logger.info('Registro y login automático completados exitosamente', { userId: response.user.id, email: response.user.email });
     } catch (error) {
       const errorMessage = getErrorMessage(error);
+      logger.error('Error en registro', { 
+        error: error instanceof Error ? error.message : 'Unknown error',
+        email: data.email 
+      });
       toastError(errorMessage);
       throw error;
     } finally {
@@ -152,6 +153,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
    * Cerrar sesión
    */
   const logout = useCallback(() => {
+    logger.info('Cerrando sesión de usuario');
     authService.logout();
     setUser(null);
     // Redirigir a la página de login
@@ -163,6 +165,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
    */
   const refreshUser = useCallback(async () => {
     try {
+      logger.debug('Refrescando información del usuario');
       const currentUser = await authService.getCurrentUser();
       setUser({
         id: currentUser.id,
@@ -171,8 +174,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         age: currentUser.age,
         diabetesType: currentUser.diabetesType,
       });
+      logger.debug('Información del usuario refrescada exitosamente');
     } catch (error) {
-      console.error('Error al refrescar usuario:', error);
+      logger.error('Error al refrescar usuario:', error);
       setUser(null);
     }
   }, []);

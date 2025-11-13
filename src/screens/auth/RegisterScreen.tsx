@@ -1,360 +1,326 @@
-import React from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { useAuth } from '../../hooks/useAuth';
 import { registerSchema, type RegisterFormData } from '../../schemas/authSchemas';
+import { toastError } from '../../utils/toast';
 
 export const RegisterScreen: React.FC = () => {
-  const navigate = useNavigate();
-  const { register: registerUser, isLoading } = useAuth();
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting },
-  } = useForm<RegisterFormData>({
-    resolver: zodResolver(registerSchema),
-    mode: 'onBlur', // Validar al perder el foco
+  const [formData, setFormData] = useState<RegisterFormData>({
+    name: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+    age: undefined,
+    diabetesType: undefined,
+    glucoseLevel: undefined
   });
+  const [showAdvancedFields, setShowAdvancedFields] = useState(false);
+  const { register: registerUser, isLoading } = useAuth();
 
-  const onSubmit = async (data: RegisterFormData) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: name === 'age' || name === 'glucoseLevel' ? (value ? Number(value) : undefined) : value
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
     try {
-      await registerUser({
-        name: data.name,
-        email: data.email,
-        password: data.password,
-      });
-      // After registration, redirect to login screen
-      navigate('/login');
-    } catch (err) {
-      // Error is handled in context with toast
-      console.error('Register error:', err);
+      // Validar datos con Zod
+      registerSchema.parse(formData);
+      
+      // Preparar datos para registro (excluir confirmPassword)
+      const { confirmPassword: _, ...registerData } = formData;
+      
+      await registerUser(registerData);
+    } catch (error) {
+      if (error instanceof Error) {
+        toastError(error.message);
+      } else {
+        toastError('Error al registrar usuario');
+      }
     }
   };
 
   return (
-    <div className="auth-container">
-      <div className="auth-card fade-in">
-        <div className="auth-header">
-          <div className="auth-logo">🩺</div>
-          <h1 className="auth-title">GlucosaApp</h1>
-          <p className="auth-subtitle">Crea tu cuenta gratuita</p>
+    <div className="register-screen">
+      <div className="register-container">
+        <div className="register-header">
+          <h1>GlucosaGuide</h1>
+          <p>Crea tu cuenta para comenzar</p>
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="auth-form">
+        <form onSubmit={handleSubmit} className="register-form">
           <div className="form-group">
-            <label className="form-label">Nombre completo</label>
+            <label htmlFor="name">Nombre completo</label>
             <input
               type="text"
-              placeholder="Juan Pérez"
-              className={`form-input ${errors.name ? 'form-input-error' : ''}`}
-              {...register('name')}
+              id="name"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              required
+              disabled={isLoading}
             />
-            {errors.name && (
-              <span className="form-error">{errors.name.message}</span>
-            )}
           </div>
 
           <div className="form-group">
-            <label className="form-label">Email</label>
+            <label htmlFor="email">Email</label>
             <input
               type="email"
-              placeholder="tu@email.com"
-              className={`form-input ${errors.email ? 'form-input-error' : ''}`}
-              {...register('email')}
+              id="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              required
+              disabled={isLoading}
             />
-            {errors.email && (
-              <span className="form-error">{errors.email.message}</span>
-            )}
           </div>
 
           <div className="form-group">
-            <label className="form-label">Contraseña</label>
+            <label htmlFor="password">Contraseña</label>
             <input
               type="password"
-              placeholder="••••••••"
-              className={`form-input ${errors.password ? 'form-input-error' : ''}`}
-              {...register('password')}
+              id="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              required
+              disabled={isLoading}
             />
-            {errors.password && (
-              <span className="form-error">{errors.password.message}</span>
-            )}
-            <p className="form-hint">Mínimo 6 caracteres</p>
           </div>
 
           <div className="form-group">
-            <label className="form-label">Confirmar contraseña</label>
+            <label htmlFor="confirmPassword">Confirmar contraseña</label>
             <input
               type="password"
-              placeholder="••••••••"
-              className={`form-input ${errors.confirmPassword ? 'form-input-error' : ''}`}
-              {...register('confirmPassword')}
+              id="confirmPassword"
+              name="confirmPassword"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              required
+              disabled={isLoading}
             />
-            {errors.confirmPassword && (
-              <span className="form-error">{errors.confirmPassword.message}</span>
-            )}
           </div>
 
-          <button
-            type="submit"
-            disabled={isSubmitting || isLoading}
-            className="btn btn-primary btn-full"
+          <button 
+            type="button" 
+            className="advanced-fields-toggle"
+            onClick={() => setShowAdvancedFields(!showAdvancedFields)}
           >
-            {isSubmitting || isLoading ? (
-              <>
-                <span className="loading-spinner" style={{ width: '20px', height: '20px', borderWidth: '2px' }} />
-                Creando cuenta...
-              </>
-            ) : (
-              'Crear Cuenta'
-            )}
+            {showAdvancedFields ? 'Ocultar campos avanzados' : 'Mostrar campos avanzados'}
           </button>
 
-          <div className="auth-divider">
-            <span>o</span>
-          </div>
+          {showAdvancedFields && (
+            <div className="advanced-fields">
+              <div className="form-group">
+                <label htmlFor="age">Edad (opcional)</label>
+                <input
+                  type="number"
+                  id="age"
+                  name="age"
+                  value={formData.age || ''}
+                  onChange={handleChange}
+                  min="18"
+                  max="120"
+                  disabled={isLoading}
+                />
+              </div>
 
-          <p className="auth-footer-text">
-            ¿Ya tienes cuenta?{' '}
-            <Link to="/login" className="auth-link">
-              Inicia sesión aquí
-            </Link>
-          </p>
+              <div className="form-group">
+                <label htmlFor="diabetesType">Tipo de diabetes (opcional)</label>
+                <select
+                  id="diabetesType"
+                  name="diabetesType"
+                  value={formData.diabetesType || ''}
+                  onChange={handleChange}
+                  disabled={isLoading}
+                >
+                  <option value="">Selecciona una opción</option>
+                  <option value="type1">Tipo 1</option>
+                  <option value="type2">Tipo 2</option>
+                  <option value="gestational">Gestacional</option>
+                  <option value="prediabetes">Prediabetes</option>
+                  <option value="other">Otro</option>
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="glucoseLevel">Nivel de glucosa inicial (mg/dL) (opcional)</label>
+                <input
+                  type="number"
+                  id="glucoseLevel"
+                  name="glucoseLevel"
+                  value={formData.glucoseLevel || ''}
+                  onChange={handleChange}
+                  min="1"
+                  max="500"
+                  disabled={isLoading}
+                />
+              </div>
+            </div>
+          )}
+
+          <button 
+            type="submit" 
+            className="register-btn"
+            disabled={isLoading}
+          >
+            {isLoading ? 'Registrando...' : 'Registrarse'}
+          </button>
         </form>
+
+        <div className="register-footer">
+          <p>¿Ya tienes cuenta? <Link to="/login">Inicia sesión aquí</Link></p>
+        </div>
       </div>
 
       <style>{`
-        .auth-container {
+        .register-screen {
+          display: flex;
+          justify-content: center;
+          align-items: center;
           min-height: 100vh;
           background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          display: flex;
-          align-items: center;
-          justify-content: center;
           padding: 20px;
-          position: relative;
-          overflow: hidden;
         }
 
-        .auth-container::before {
-          content: '';
-          position: absolute;
-          top: -50%;
-          left: -50%;
-          width: 200%;
-          height: 200%;
-          background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-          animation: pulse 8s ease-in-out infinite;
-        }
-
-        .auth-card {
-          background: rgba(255, 255, 255, 0.98);
-          backdrop-filter: blur(20px);
-          border-radius: 24px;
-          padding: 48px;
+        .register-container {
+          background: white;
+          border-radius: 12px;
+          padding: 40px;
           width: 100%;
           max-width: 450px;
-          box-shadow: 0 25px 50px rgba(0,0,0,0.25);
-          position: relative;
-          z-index: 2;
-          animation: slideUp 0.6s ease-out;
+          box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
         }
 
-        .auth-header {
+        .register-header {
           text-align: center;
-          margin-bottom: 40px;
+          margin-bottom: 30px;
         }
 
-        .auth-logo {
-          font-size: 48px;
-          margin-bottom: 16px;
-          animation: bounce 2s ease-in-out infinite;
-        }
-
-        .auth-title {
-          font-size: 32px;
-          font-weight: 800;
+        .register-header h1 {
+          margin: 0 0 10px 0;
           color: #333;
-          margin: 0 0 8px 0;
+          font-size: 32px;
         }
 
-        .auth-subtitle {
-          font-size: 16px;
-          color: #666;
+        .register-header p {
           margin: 0;
+          color: #666;
+          font-size: 16px;
         }
 
-        .auth-form {
-          display: flex;
-          flex-direction: column;
-          gap: 24px;
+        .register-form {
+          margin-bottom: 20px;
         }
 
         .form-group {
-          display: flex;
-          flex-direction: column;
-          gap: 8px;
+          margin-bottom: 20px;
         }
 
-        .form-label {
-          font-weight: 600;
-          color: #333;
-          font-size: 14px;
+        .form-group label {
+          display: block;
+          margin-bottom: 8px;
+          font-weight: 500;
+          color: #555;
         }
 
-        .form-input {
-          padding: 16px 20px;
-          border: 2px solid #e0e0e0;
-          border-radius: 16px;
+        .form-group input,
+        .form-group select {
+          width: 100%;
+          padding: 12px;
+          border: 2px solid #e1e5e9;
+          border-radius: 8px;
           font-size: 16px;
-          transition: all 0.3s ease;
-          background: #fafafa;
+          transition: border-color 0.2s ease;
+          box-sizing: border-box;
         }
 
-        .form-input:focus {
+        .form-group input:focus,
+        .form-group select:focus {
           outline: none;
           border-color: #764ba2;
-          background: white;
-          box-shadow: 0 0 0 4px rgba(118, 75, 162, 0.1);
         }
 
-        .form-input-error {
-          border-color: #dc3545 !important;
-          background: #fff5f5 !important;
-        }
-
-        .form-error {
-          color: #dc3545;
-          font-size: 14px;
-          font-weight: 500;
-          margin-top: 4px;
-        }
-
-        .form-hint {
-          color: #999;
-          font-size: 12px;
-          margin-top: 4px;
-        }
-
-        .btn {
-          padding: 16px 24px;
-          border: none;
-          border-radius: 16px;
-          font-size: 16px;
-          font-weight: 600;
-          cursor: pointer;
-          transition: all 0.3s ease;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 8px;
-        }
-
-        .btn:disabled {
-          opacity: 0.7;
+        .form-group input:disabled,
+        .form-group select:disabled {
+          background: #f5f5f5;
           cursor: not-allowed;
         }
 
-        .btn-primary {
-          background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
-          color: white;
-          box-shadow: 0 4px 15px rgba(118, 75, 162, 0.3);
-        }
-
-        .btn-primary:hover:not(:disabled) {
-          transform: translateY(-2px);
-          box-shadow: 0 6px 20px rgba(118, 75, 162, 0.4);
-        }
-
-        .btn-full {
+        .advanced-fields-toggle {
           width: 100%;
-        }
-
-        .loading-spinner {
-          border: 2px solid rgba(255, 255, 255, 0.3);
-          border-top: 2px solid white;
-          border-radius: 50%;
-          animation: spin 1s linear infinite;
-        }
-
-        .auth-divider {
-          display: flex;
-          align-items: center;
-          margin: 16px 0;
-        }
-
-        .auth-divider span {
+          padding: 12px;
           background: #f0f0f0;
-          padding: 0 16px;
-          color: #999;
+          color: #666;
+          border: 2px solid #e1e5e9;
+          border-radius: 8px;
           font-size: 14px;
-          position: relative;
-          z-index: 1;
+          font-weight: 500;
+          cursor: pointer;
+          margin-bottom: 20px;
+          transition: all 0.2s ease;
         }
 
-        .auth-divider::before {
-          content: '';
-          flex: 1;
-          height: 1px;
-          background: #e0e0e0;
+        .advanced-fields-toggle:hover {
+          background: #e8e8e8;
+          border-color: #d1d5d9;
         }
 
-        .auth-divider::after {
-          content: '';
-          flex: 1;
-          height: 1px;
-          background: #e0e0e0;
+        .advanced-fields {
+          margin-bottom: 20px;
+          padding: 20px;
+          background: #f8f9fa;
+          border-radius: 8px;
         }
 
-        .auth-footer-text {
+        .register-btn {
+          width: 100%;
+          padding: 14px;
+          background: #764ba2;
+          color: white;
+          border: none;
+          border-radius: 8px;
+          font-size: 16px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: background-color 0.2s ease;
+        }
+
+        .register-btn:hover:not(:disabled) {
+          background: #6a4190;
+        }
+
+        .register-btn:disabled {
+          background: #ccc;
+          cursor: not-allowed;
+        }
+
+        .register-footer {
           text-align: center;
           color: #666;
-          font-size: 14px;
-          margin: 0;
         }
 
-        .auth-link {
+        .register-footer a {
           color: #764ba2;
           text-decoration: none;
-          font-weight: 600;
+          font-weight: 500;
         }
 
-        .auth-link:hover {
+        .register-footer a:hover {
           text-decoration: underline;
         }
 
-        @keyframes pulse {
-          0%, 100% { opacity: 0.1; }
-          50% { opacity: 0.15; }
-        }
-
-        @keyframes slideUp {
-          from {
-            opacity: 0;
-            transform: translateY(30px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        @keyframes bounce {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-10px); }
-        }
-
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-
         @media (max-width: 768px) {
-          .auth-card {
-            padding: 32px 24px;
-            margin: 20px;
+          .register-container {
+            padding: 30px 20px;
           }
-          
-          .auth-title {
+
+          .register-header h1 {
             font-size: 28px;
           }
         }

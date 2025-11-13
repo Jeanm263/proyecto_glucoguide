@@ -1,29 +1,31 @@
-import { Navigate } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
+import React from 'react';
+import { Navigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../../hooks/useAuth';
 import { LoadingScreen } from '../common/LoadingScreen';
 
 interface ProtectedRouteProps {
-  children: React.ReactElement;
+  children: React.ReactNode;
 }
 
 /**
- * Componente que protege rutas privadas
+ * Componente que protege rutas que requieren autenticación
  * Redirige a login si el usuario no está autenticado
  */
 export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   const { isAuthenticated, isLoading } = useAuth();
-  
-  console.log('ProtectedRoute: isAuthenticated:', isAuthenticated, 'isLoading:', isLoading);
+  const location = useLocation();
 
+  // Mostrar spinner mientras se verifica la autenticación
   if (isLoading) {
     return <LoadingScreen />;
   }
 
+  // Si no está autenticado, redirigir a login
   if (!isAuthenticated) {
-    console.log('ProtectedRoute: User not authenticated, redirecting to /login');
-    return <Navigate to="/login" replace />;
+    // Guardar la ruta a la que se intentaba acceder para redirigir después del login
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  console.log('ProtectedRoute: User authenticated, allowing access to protected route');
-  return children;
+  // Si está autenticado, mostrar el contenido
+  return <>{children}</>;
 };

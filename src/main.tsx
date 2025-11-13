@@ -5,6 +5,7 @@ import App from "./App";
 import "./index.css";
 import { validateEnv } from "./config/env";
 import { AuthProvider } from "./contexts/AuthContext";
+import monitoringService from "./services/monitoringService";
 
 // Validar variables de entorno al iniciar la aplicación
 try {
@@ -20,6 +21,9 @@ try {
     throw error;
   }
 }
+
+// Inicializar servicio de monitoreo
+monitoringService.initialize();
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>

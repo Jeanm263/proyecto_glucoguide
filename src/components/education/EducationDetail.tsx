@@ -26,6 +26,7 @@ export const EducationDetail: React.FC<EducationDetailProps> = ({ content, onClo
       document.removeEventListener('keydown', handleEscape);
     };
   }, [onClose]);
+
   const getTypeIcon = (type: string) => {
     switch (type) {
       case 'article': return '📄';
@@ -57,6 +58,117 @@ export const EducationDetail: React.FC<EducationDetailProps> = ({ content, onClo
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Escape') {
       onClose();
+    }
+  };
+
+  const renderVideoContent = () => {
+    return (
+      <div className="video-content">
+        <div className="video-placeholder">
+          <div className="video-icon">🎬</div>
+          <h3 className="video-title">Contenido de Video</h3>
+          <p className="video-description">
+            Este contenido incluye videos instructivos sobre ejercicios para personas con diabetes.
+            En una implementación completa, aquí se mostrarían videos reales con demostraciones
+            de ejercicios paso a paso.
+          </p>
+          <div className="video-features">
+            <div className="feature">
+              <span className="feature-icon">✅</span>
+              <span className="feature-text">Demostraciones visuales</span>
+            </div>
+            <div className="feature">
+              <span className="feature-icon">🎯</span>
+              <span className="feature-text">Instrucciones detalladas</span>
+            </div>
+            <div className="feature">
+              <span className="feature-icon">🛡️</span>
+              <span className="feature-text">Ejercicios seguros para diabéticos</span>
+            </div>
+          </div>
+          <div className="exercise-preview">
+            <h4 className="preview-title">Ejercicios incluidos:</h4>
+            <ul className="exercise-list">
+              <li>Calentamiento y estiramientos</li>
+              <li>Ejercicios cardiovasculares</li>
+              <li>Entrenamiento de fuerza</li>
+              <li>Yoga y flexibilidad</li>
+              <li>Enfriamiento y recuperación</li>
+            </ul>
+          </div>
+        </div>
+        <div className="content-text">
+          {parseContent(content.content)}
+        </div>
+      </div>
+    );
+  };
+
+  const renderInteractiveContent = () => {
+    return (
+      <div className="interactive-content">
+        <div className="interactive-header">
+          <div className="interactive-icon">🎯</div>
+          <h3 className="interactive-title">Contenido Interactivo</h3>
+          <p className="interactive-description">
+            Este contenido incluye elementos interactivos para una mejor comprensión.
+          </p>
+        </div>
+        <div className="content-text">
+          {parseContent(content.content)}
+        </div>
+        <div className="interactive-elements">
+          <div className="tip-box">
+            <div className="tip-icon">💡</div>
+            <div className="tip-content">
+              <h4 className="tip-title">Tip Profesional</h4>
+              <p className="tip-text">
+                Recuerda siempre consultar con tu médico antes de comenzar cualquier rutina de ejercicios.
+              </p>
+            </div>
+          </div>
+          <div className="checklist">
+            <h4 className="checklist-title">Lista de Verificación</h4>
+            <ul className="checklist-items">
+              <li className="checklist-item">
+                <span className="check-icon">☐</span>
+                <span className="check-text">Monitorear glucosa antes y después</span>
+              </li>
+              <li className="checklist-item">
+                <span className="check-icon">☐</span>
+                <span className="check-text">Mantenerse hidratado</span>
+              </li>
+              <li className="checklist-item">
+                <span className="check-icon">☐</span>
+                <span className="check-text">Tener snack a mano</span>
+              </li>
+              <li className="checklist-item">
+                <span className="check-icon">☐</span>
+                <span className="check-text">Usar calzado adecuado</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const renderArticleContent = () => {
+    return (
+      <div className="content-text">
+        {parseContent(content.content)}
+      </div>
+    );
+  };
+
+  const renderContent = () => {
+    switch (content.type) {
+      case 'video':
+        return renderVideoContent();
+      case 'interactive':
+        return renderInteractiveContent();
+      default:
+        return renderArticleContent();
     }
   };
 
@@ -105,9 +217,7 @@ export const EducationDetail: React.FC<EducationDetailProps> = ({ content, onClo
           </div>
         </div>
 
-        <div className="education-modal-content-text">
-          {parseContent(content.content)}
-        </div>
+        {renderContent()}
 
         {content.tags && content.tags.length > 0 && (
           <div className="education-detail-tags">
@@ -230,7 +340,7 @@ export const EducationDetail: React.FC<EducationDetailProps> = ({ content, onClo
           letter-spacing: 0.5px;
         }
 
-        .education-modal-content-text {
+        .content-text {
           font-size: 17px;
           line-height: 1.9;
           color: #444;
@@ -238,9 +348,207 @@ export const EducationDetail: React.FC<EducationDetailProps> = ({ content, onClo
           margin-bottom: 32px;
         }
 
-        .education-modal-content-text strong {
+        .content-text strong {
           color: #667eea;
           font-weight: 700;
+        }
+
+        /* Video Content Styles */
+        .video-content {
+          margin-bottom: 32px;
+        }
+
+        .video-placeholder {
+          background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+          border-radius: 16px;
+          padding: 32px;
+          margin-bottom: 32px;
+          text-align: center;
+          border: 2px dashed #667eea;
+        }
+
+        .video-icon {
+          font-size: 64px;
+          margin-bottom: 16px;
+        }
+
+        .video-title {
+          font-size: 24px;
+          font-weight: 700;
+          color: #333;
+          margin: 0 0 12px 0;
+        }
+
+        .video-description {
+          font-size: 16px;
+          color: #666;
+          margin: 0 0 24px 0;
+          line-height: 1.6;
+        }
+
+        .video-features {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 20px;
+          justify-content: center;
+          margin-bottom: 24px;
+        }
+
+        .feature {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          background: white;
+          padding: 12px 16px;
+          border-radius: 12px;
+          box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+
+        .feature-icon {
+          font-size: 20px;
+        }
+
+        .feature-text {
+          font-weight: 600;
+          color: #333;
+        }
+
+        .exercise-preview {
+          background: white;
+          border-radius: 12px;
+          padding: 20px;
+          box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+
+        .preview-title {
+          font-size: 18px;
+          font-weight: 700;
+          color: #333;
+          margin: 0 0 16px 0;
+        }
+
+        .exercise-list {
+          text-align: left;
+          padding-left: 20px;
+          margin: 0;
+        }
+
+        .exercise-list li {
+          margin-bottom: 8px;
+          color: #555;
+        }
+
+        /* Interactive Content Styles */
+        .interactive-content {
+          margin-bottom: 32px;
+        }
+
+        .interactive-header {
+          background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+          border-radius: 16px;
+          padding: 24px;
+          margin-bottom: 32px;
+          text-align: center;
+        }
+
+        .interactive-icon {
+          font-size: 48px;
+          margin-bottom: 16px;
+        }
+
+        .interactive-title {
+          font-size: 24px;
+          font-weight: 700;
+          color: #1976d2;
+          margin: 0 0 8px 0;
+        }
+
+        .interactive-description {
+          font-size: 16px;
+          color: #1976d2;
+          margin: 0;
+          font-weight: 500;
+        }
+
+        .interactive-elements {
+          display: flex;
+          flex-direction: column;
+          gap: 24px;
+        }
+
+        .tip-box {
+          display: flex;
+          gap: 16px;
+          background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
+          border-radius: 16px;
+          padding: 20px;
+          align-items: flex-start;
+        }
+
+        .tip-icon {
+          font-size: 28px;
+          flex-shrink: 0;
+        }
+
+        .tip-content {
+          flex: 1;
+        }
+
+        .tip-title {
+          font-size: 18px;
+          font-weight: 700;
+          color: #333;
+          margin: 0 0 8px 0;
+        }
+
+        .tip-text {
+          font-size: 16px;
+          color: #555;
+          margin: 0;
+          line-height: 1.5;
+        }
+
+        .checklist {
+          background: white;
+          border-radius: 16px;
+          padding: 24px;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        .checklist-title {
+          font-size: 20px;
+          font-weight: 700;
+          color: #333;
+          margin: 0 0 16px 0;
+        }
+
+        .checklist-items {
+          list-style: none;
+          padding: 0;
+          margin: 0;
+        }
+
+        .checklist-item {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding: 12px 0;
+          border-bottom: 1px solid #f0f0f0;
+        }
+
+        .checklist-item:last-child {
+          border-bottom: none;
+        }
+
+        .check-icon {
+          font-size: 20px;
+          color: #667eea;
+        }
+
+        .check-text {
+          font-size: 16px;
+          color: #444;
+          flex: 1;
         }
 
         .education-detail-tags {
@@ -301,8 +609,23 @@ export const EducationDetail: React.FC<EducationDetailProps> = ({ content, onClo
             font-size: 24px;
           }
 
-          .education-modal-content-text {
+          .content-text {
             font-size: 16px;
+          }
+
+          .video-features {
+            flex-direction: column;
+            align-items: center;
+          }
+
+          .feature {
+            width: 100%;
+            justify-content: center;
+          }
+
+          .tip-box {
+            flex-direction: column;
+            text-align: center;
           }
         }
       `}</style>

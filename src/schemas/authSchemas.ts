@@ -37,6 +37,20 @@ export const registerSchema = z
       .min(6, 'La contraseña debe tener al menos 6 caracteres')
       .max(100, 'La contraseña no puede exceder 100 caracteres'),
     confirmPassword: z.string().min(1, 'Confirma tu contraseña'),
+    age: z
+      .number()
+      .min(18, 'Debes tener al menos 18 años')
+      .max(120, 'Edad no válida')
+      .optional(),
+    diabetesType: z
+      .string()
+      .min(1, 'Selecciona el tipo de diabetes')
+      .optional(),
+    glucoseLevel: z
+      .number()
+      .min(1, 'El nivel de glucosa debe ser mayor a 0')
+      .max(500, 'Nivel de glucosa no válido')
+      .optional(),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: 'Las contraseñas no coinciden',
@@ -44,4 +58,3 @@ export const registerSchema = z
   });
 
 export type RegisterFormData = z.infer<typeof registerSchema>;
-

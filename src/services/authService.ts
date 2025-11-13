@@ -1,5 +1,6 @@
 import apiClient from './api';
 import { USE_MOCK_SERVICE } from '../config/env';
+import logger from '../utils/logger';
 
 export interface LoginCredentials {
   email: string;
@@ -12,6 +13,7 @@ export interface RegisterData {
   name: string;
   age?: number;
   diabetesType?: string;
+  glucoseLevel?: number;
 }
 
 export interface User {
@@ -20,6 +22,7 @@ export interface User {
   email: string;
   age?: number;
   diabetesType?: string;
+  glucoseLevel?: number;
 }
 
 export interface AuthResponse {
@@ -39,8 +42,11 @@ export const authService = {
     }
     
     try {
+      logger.info('Iniciando proceso de login', { email: credentials.email });
       const response = await apiClient.post('/auth/login', credentials);
       const { user } = response.data;
+      
+      logger.info('Login exitoso', { userId: user.id, email: user.email });
       
       // El token se maneja con cookies, no es necesario guardarlo
       
@@ -49,7 +55,10 @@ export const authService = {
         user 
       };
     } catch (error) {
-      console.error('Error logging in:', error);
+      logger.error('Error en login', { 
+        error: error instanceof Error ? error.message : 'Unknown error',
+        email: credentials.email 
+      });
       throw error;
     }
   },
@@ -65,8 +74,11 @@ export const authService = {
     }
     
     try {
+      logger.info('Iniciando proceso de registro', { email: data.email });
       const response = await apiClient.post('/auth/register', data);
       const { user } = response.data;
+      
+      logger.info('Registro exitoso', { userId: user.id, email: user.email });
       
       // El token se maneja con cookies, no es necesario guardarlo
       
@@ -75,7 +87,10 @@ export const authService = {
         user 
       };
     } catch (error) {
-      console.error('Error registering:', error);
+      logger.error('Error en registro', { 
+        error: error instanceof Error ? error.message : 'Unknown error',
+        email: data.email 
+      });
       throw error;
     }
   },
@@ -84,6 +99,7 @@ export const authService = {
    * Cerrar sesión
    */
   logout(): void {
+    logger.info('Cerrando sesión de usuario');
     // En el caso de cookies, podríamos hacer una llamada al backend
     // para eliminar la cookie de sesión
     // La redirección se manejará en el contexto de autenticación
@@ -100,10 +116,14 @@ export const authService = {
     }
     
     try {
+      logger.debug('Obteniendo información del usuario actual');
       const response = await apiClient.get('/auth/me');
+      logger.debug('Información del usuario obtenida exitosamente');
       return response.data.user;
     } catch (error) {
-      console.error('Error getting current user:', error);
+      logger.error('Error al obtener usuario actual', { 
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
       throw error;
     }
   },
@@ -119,11 +139,15 @@ export const authService = {
     
     try {
       // Verificar autenticación consultando el endpoint protegido
+      logger.debug('Verificando estado de autenticación');
       await apiClient.get('/auth/me');
+      logger.debug('Usuario autenticado');
       return true;
     } catch (error: unknown) {
       // Si hay un error, asumimos que no estamos autenticados
-      console.log('Authentication check failed - user not authenticated:', error);
+      logger.debug('Usuario no autenticado', { 
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
       return false;
     }
   },

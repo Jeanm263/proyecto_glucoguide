@@ -28,6 +28,12 @@ const NAVIGATION_ITEMS: BottomNavigationItem[] = [
     path: '/food-tracking'
   },
   {
+    id: 'glucose',
+    label: 'Glucosa',
+    icon: '📊',
+    path: '/glucose'
+  },
+  {
     id: 'education',
     label: 'Educación',
     icon: '📚',
