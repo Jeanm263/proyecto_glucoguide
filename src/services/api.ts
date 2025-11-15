@@ -15,6 +15,9 @@ const apiClient = axios.create({
   withCredentials: true, // Importante para manejar cookies
 });
 
+// Configurar por defecto withCredentials para todas las solicitudes
+apiClient.defaults.withCredentials = true;
+
 // Interceptor para agregar token de autenticación si existe
 // No es necesario ya que usamos cookies para la autenticación
 apiClient.interceptors.request.use(
@@ -66,6 +69,8 @@ apiClient.interceptors.response.use(
     } else if (error.request) {
       // La petición se hizo pero no hubo respuesta
       console.error('Sin respuesta del servidor. Verifica tu conexión a internet.');
+      // Mostrar más detalles del error
+      console.error('Detalles del error de red:', error);
     } else {
       // Algo pasó al configurar la petición
       console.error('Error al configurar la petición:', error.message);
