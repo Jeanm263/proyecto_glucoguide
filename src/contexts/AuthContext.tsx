@@ -115,11 +115,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setIsLoading(true);
       logger.info('Iniciando proceso de registro', { email: data.email });
       // Register the user
-      await authService.register(data);
+      const response: AuthResponse = await authService.register(data);
       toastSuccess('¡Cuenta creada exitosamente!');
       
-      // No auto-login after registration - user should go to login screen
-      logger.info('Registro completado exitosamente', { email: data.email });
+      // Auto-login after registration as per project requirements
+      setUser({
+        id: response.user.id,
+        name: response.user.name,
+        email: response.user.email,
+        age: response.user.age,
+        diabetesType: response.user.diabetesType,
+      });
+      
+      logger.info('Registro y login automático completados exitosamente', { userId: response.user.id, email: response.user.email });
     } catch (error) {
       const errorMessage = getErrorMessage(error);
       logger.error('Error en registro', { 

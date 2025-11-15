@@ -29,8 +29,8 @@ export const RegisterScreen: React.FC = () => {
     
     try {
       await register({ name, email, password });
-      // After successful registration, redirect to login screen
-      navigate('/login');
+      // After successful registration with auto-login, redirect to home screen
+      navigate('/home');
     } catch (error) {
       console.error('Error en registro:', error);
       setError('Error al crear la cuenta. Por favor, inténtalo de nuevo.');
