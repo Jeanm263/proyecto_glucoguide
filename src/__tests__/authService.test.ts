@@ -142,6 +142,9 @@ describe('authService', () => {
 
   describe('logout', () => {
     it('debería cerrar sesión correctamente', () => {
+      // Mock de apiClient.post para evitar errores
+      (apiClient.post as jest.Mock).mockResolvedValue({});
+      
       // El método logout no hace una llamada a la API, solo limpia el estado local
       expect(() => authService.logout()).not.toThrow();
     });
