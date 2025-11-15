@@ -1,207 +1,179 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
-import { toastError } from '../../utils/toast';
-
-interface LoginFormData {
-  email: string;
-  password: string;
-}
 
 export const LoginScreen: React.FC = () => {
-  const [formData, setFormData] = useState<LoginFormData>({
-    email: '',
-    password: ''
-  });
-  const { login, isLoading } = useAuth();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const { login, isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
+  // Redirect to home if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/home');
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await login(formData);
+      await login({ email, password });
       navigate('/home');
     } catch (error) {
-      console.error('Login error:', error);
-      toastError('Credenciales inválidas. Por favor, inténtalo de nuevo.');
+      console.error('Error en login:', error);
+      setError('Credenciales inválidas. Por favor, inténtalo de nuevo.');
     }
   };
 
   return (
-    <div className="login-screen">
-      <div className="login-container">
-        <div className="login-header">
-          <h1>GlucosaGuide</h1>
-          <p>Inicia sesión para continuar</p>
+    <div className="container" style={{ 
+      display: 'flex', 
+      alignItems: 'center', 
+      justifyContent: 'center', 
+      minHeight: '100vh',
+      padding: '20px'
+    }}>
+      <div className="modern-card" style={{ 
+        maxWidth: '400px', 
+        width: '100%',
+        margin: '20px 0'
+      }}>
+        <div style={{ textAlign: 'center', marginBottom: '30px' }}>
+          <div style={{ 
+            width: '60px', 
+            height: '60px', 
+            borderRadius: 'var(--radius-full)', 
+            backgroundColor: 'var(--primary-100)', 
+            color: 'var(--primary-700)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '1.5rem',
+            fontWeight: 'bold',
+            margin: '0 auto 15px'
+          }}>
+            G
+          </div>
+          <h1 style={{ 
+            fontFamily: 'var(--font-family-heading)', 
+            fontSize: '2rem', 
+            fontWeight: 700, 
+            color: 'var(--neutral-900)',
+            margin: '0 0 5px 0'
+          }}>
+            GlucosaGuide
+          </h1>
+          <p style={{ 
+            color: 'var(--neutral-600)', 
+            margin: 0 
+          }}>
+            Gestiona tu diabetes de forma inteligente
+          </p>
         </div>
-
-        <form onSubmit={handleSubmit} className="login-form">
-          <div className="form-group">
-            <label htmlFor="email">Email</label>
+        
+        <h2 className="modern-card-title" style={{ textAlign: 'center', marginBottom: '20px' }}>
+          Iniciar Sesión
+        </h2>
+        
+        {error && (
+          <div className="modern-alert modern-alert-error">
+            {error}
+          </div>
+        )}
+        
+        <form onSubmit={handleSubmit}>
+          <div className="modern-form-group">
+            <label className="modern-form-label">Correo Electrónico</label>
             <input
               type="email"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
+              className="modern-form-input"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               required
-              disabled={isLoading}
             />
           </div>
-
-          <div className="form-group">
-            <label htmlFor="password">Contraseña</label>
+          
+          <div className="modern-form-group">
+            <label className="modern-form-label">Contraseña</label>
             <input
               type="password"
-              id="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
+              className="modern-form-input"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               required
-              disabled={isLoading}
             />
           </div>
-
+          
+          <div style={{ 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center', 
+            marginBottom: '20px',
+            flexWrap: 'wrap',
+            gap: '10px'
+          }}>
+            <label style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              color: 'var(--neutral-600)',
+              fontSize: '0.9rem'
+            }}>
+              <input 
+                type="checkbox" 
+                style={{ 
+                  marginRight: '8px',
+                  borderRadius: 'var(--radius-sm)'
+                }} 
+              />
+              Recordarme
+            </label>
+            <Link 
+              to="/forgot-password" 
+              style={{ 
+                color: 'var(--primary-600)', 
+                textDecoration: 'none',
+                fontSize: '0.9rem',
+                fontWeight: 500
+              }}
+            >
+              ¿Olvidaste tu contraseña?
+            </Link>
+          </div>
+          
           <button 
             type="submit" 
-            className="login-btn"
-            disabled={isLoading}
+            className="modern-btn modern-btn-primary modern-btn-lg modern-btn-block"
           >
-            {isLoading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
+            Iniciar Sesión
           </button>
         </form>
-
-        <div className="login-footer">
-          <p>¿No tienes cuenta? <Link to="/register">Regístrate aquí</Link></p>
+        
+        <div style={{ 
+          marginTop: '25px', 
+          textAlign: 'center', 
+          paddingTop: '20px', 
+          borderTop: '1px solid var(--neutral-200)'
+        }}>
+          <p style={{ 
+            color: 'var(--neutral-600)',
+            margin: 0
+          }}>
+            ¿No tienes cuenta?{' '}
+            <Link 
+              to="/register" 
+              style={{ 
+                color: 'var(--primary-600)', 
+                fontWeight: 500,
+                textDecoration: 'none'
+              }}
+            >
+              Regístrate aquí
+            </Link>
+          </p>
         </div>
       </div>
-
-      <style>{`
-        .login-screen {
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          min-height: 100vh;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          padding: 20px;
-        }
-
-        .login-container {
-          background: white;
-          border-radius: 12px;
-          padding: 40px;
-          width: 100%;
-          max-width: 400px;
-          box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-        }
-
-        .login-header {
-          text-align: center;
-          margin-bottom: 30px;
-        }
-
-        .login-header h1 {
-          margin: 0 0 10px 0;
-          color: #333;
-          font-size: 32px;
-        }
-
-        .login-header p {
-          margin: 0;
-          color: #666;
-          font-size: 16px;
-        }
-
-        .login-form {
-          margin-bottom: 20px;
-        }
-
-        .form-group {
-          margin-bottom: 20px;
-        }
-
-        .form-group label {
-          display: block;
-          margin-bottom: 8px;
-          font-weight: 500;
-          color: #555;
-        }
-
-        .form-group input {
-          width: 100%;
-          padding: 12px;
-          border: 2px solid #e1e5e9;
-          border-radius: 8px;
-          font-size: 16px;
-          transition: border-color 0.2s ease;
-          box-sizing: border-box;
-        }
-
-        .form-group input:focus {
-          outline: none;
-          border-color: #764ba2;
-        }
-
-        .form-group input:disabled {
-          background: #f5f5f5;
-          cursor: not-allowed;
-        }
-
-        .login-btn {
-          width: 100%;
-          padding: 14px;
-          background: #764ba2;
-          color: white;
-          border: none;
-          border-radius: 8px;
-          font-size: 16px;
-          font-weight: 600;
-          cursor: pointer;
-          transition: background-color 0.2s ease;
-        }
-
-        .login-btn:hover:not(:disabled) {
-          background: #6a4190;
-        }
-
-        .login-btn:disabled {
-          background: #ccc;
-          cursor: not-allowed;
-        }
-
-        .login-footer {
-          text-align: center;
-          color: #666;
-        }
-
-        .login-footer a {
-          color: #764ba2;
-          text-decoration: none;
-          font-weight: 500;
-        }
-
-        .login-footer a:hover {
-          text-decoration: underline;
-        }
-
-        @media (max-width: 768px) {
-          .login-container {
-            padding: 30px 20px;
-          }
-
-          .login-header h1 {
-            font-size: 28px;
-          }
-        }
-      `}</style>
     </div>
   );
 };

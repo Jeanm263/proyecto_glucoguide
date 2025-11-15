@@ -1,139 +1,81 @@
-import React, { Suspense, useState } from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { HomeScreen } from "./screens/HomeScreen";
-import { FoodSearchScreen } from "./screens/foods/FoodSearchScreen";
-import { EducationScreen } from "./screens/education/EducationScreen";
-import { LoginScreen } from "./screens/auth/LoginScreen";
-import { RegisterScreen } from "./screens/auth/RegisterScreen";
-import { ProtectedRoute } from "./components/auth/ProtectedRoute";
-import { ProfileScreen } from "./screens/ProfileScreen";
-import { FoodTrackingScreen } from "./screens/foods/FoodTrackingScreen";
-import { GlucoseScreen } from "./screens/GlucoseScreen";
-
-// --- Redirección inicial: siempre redirige a login primero
-const DefaultRedirect = () => {
-  // Siempre redirigir a login como punto de entrada inicial
-  return <Navigate to="/login" replace />;
-};
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { AuthProvider } from './contexts/AuthContext';
+import { ProtectedRoute } from './components/auth/ProtectedRoute';
+import { LoginScreen } from './screens/auth/LoginScreen';
+import { RegisterScreen } from './screens/auth/RegisterScreen';
+import { HomeScreen } from './screens/HomeScreen';
+import { ProfileScreen } from './screens/ProfileScreen';
+import { SettingsScreen } from './screens/SettingsScreen';
+import { GlucoseScreen } from './screens/GlucoseScreen';
+import { FoodSearchScreen } from './screens/foods/FoodSearchScreen';
+import { FoodTrackingScreen } from './screens/foods/FoodTrackingScreen';
+import { EducationScreen } from './screens/education/EducationScreen';
+import ModernNavbar from './components/common/ModernNavbar';
+import './index.css';
 
 const App: React.FC = () => {
   return (
-    <BrowserRouter>
-      <Routes>
-        {/* Redirección por defecto */}
-        <Route path="/" element={<DefaultRedirect />} />
-
-        {/* Rutas públicas */}
-        <Route
-          path="/login"
-          // 🔧 Si el LoginScreen falla, muestra un fallback temporal
-          element={
-            <ErrorBoundary>
-              <LoginScreen />
-            </ErrorBoundary>
-          }
-        />
-        <Route path="/register" element={<RegisterScreen />} />
-
-        {/* Rutas protegidas */}
-        <Route
-          path="/home"
-          element={
-            <ProtectedRoute>
-              <HomeScreen />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/foods"
-          element={
-            <ProtectedRoute>
-              <FoodSearchScreen />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/food-tracking"
-          element={
-            <ProtectedRoute>
-              <FoodTrackingScreen />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/education"
-          element={
-            <ProtectedRoute>
-              <EducationScreen />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/profile"
-          element={
-            <ProtectedRoute>
-              <ProfileScreen />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/glucose"
-          element={
-            <ProtectedRoute>
-              <GlucoseScreen />
-            </ProtectedRoute>
-          }
-        />
-
-        {/* Ruta no encontrada */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </BrowserRouter>
+    <AuthProvider>
+      <Router>
+        <div>
+          <Routes>
+            {/* Rutas públicas - sin barra de navegación */}
+            <Route path="/login" element={<LoginScreen />} />
+            <Route path="/register" element={<RegisterScreen />} />
+            
+            {/* Rutas protegidas - con barra de navegación */}
+            <Route path="/home" element={
+              <div>
+                <ModernNavbar />
+                <ProtectedRoute><HomeScreen /></ProtectedRoute>
+              </div>
+            } />
+            <Route path="/profile" element={
+              <div>
+                <ModernNavbar />
+                <ProtectedRoute><ProfileScreen /></ProtectedRoute>
+              </div>
+            } />
+            <Route path="/settings" element={
+              <div>
+                <ModernNavbar />
+                <ProtectedRoute><SettingsScreen /></ProtectedRoute>
+              </div>
+            } />
+            <Route path="/glucose" element={
+              <div>
+                <ModernNavbar />
+                <ProtectedRoute><GlucoseScreen /></ProtectedRoute>
+              </div>
+            } />
+            <Route path="/foods" element={
+              <div>
+                <ModernNavbar />
+                <ProtectedRoute><FoodSearchScreen /></ProtectedRoute>
+              </div>
+            } />
+            <Route path="/foods/tracking" element={
+              <div>
+                <ModernNavbar />
+                <ProtectedRoute><FoodTrackingScreen /></ProtectedRoute>
+              </div>
+            } />
+            <Route path="/education" element={
+              <div>
+                <ModernNavbar />
+                <ProtectedRoute><EducationScreen /></ProtectedRoute>
+              </div>
+            } />
+            
+            {/* Ruta por defecto - redirige al login */}
+            <Route path="/" element={<LoginScreen />} />
+            <Route path="*" element={<LoginScreen />} />
+          </Routes>
+        </div>
+      </Router>
+    </AuthProvider>
   );
 };
 
 export default App;
-
-/**
- * Componente auxiliar para capturar errores en pantallas
- * Si un componente (como LoginScreen) lanza un error de render, evita la pantalla en blanco
- */
-function ErrorBoundary({ children }: { children: React.ReactNode }) {
-  const [error, setError] = useState<Error | null>(null);
-
-  return (
-    <Suspense fallback={<p>Cargando componente...</p>}>
-      {error ? (
-        <div
-          style={{
-            padding: "2rem",
-            color: "red",
-            textAlign: "center",
-            fontWeight: "bold",
-          }}
-        >
-          ⚠️ Error al cargar componente:
-          <br />
-          {error.message}
-        </div>
-      ) : (
-        <ErrorCatcher onError={setError}>{children}</ErrorCatcher>
-      )}
-    </Suspense>
-  );
-}
-
-function ErrorCatcher({
-  children,
-  onError,
-}: {
-  children: React.ReactNode;
-  onError: (error: Error) => void;
-}) {
-  try {
-    return <>{children}</>;
-  } catch (err) {
-    onError(err as Error);
-    return null;
-  }
-}

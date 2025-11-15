@@ -69,6 +69,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         // En entorno de pruebas o cuando se usa el servicio mock, establecer isLoading a false inmediatamente
         logger.debug('Usando servicio mock o entorno de pruebas, estableciendo isLoading a false');
         setIsLoading(false);
+        // Also set user to null in mock mode to ensure proper navigation
+        setUser(null);
       }
     };
 
@@ -116,26 +118,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       await authService.register(data);
       toastSuccess('¡Cuenta creada exitosamente!');
       
-      // Auto-login after registration as per project requirements
-      // Use the same credentials to login
-      const loginCredentials: LoginCredentials = {
-        email: data.email,
-        password: data.password
-      };
-      
-      // Perform login
-      const response: AuthResponse = await authService.login(loginCredentials);
-      setUser({
-        id: response.user.id,
-        name: response.user.name,
-        email: response.user.email,
-        age: response.user.age,
-        diabetesType: response.user.diabetesType,
-      });
-      
-      // Redirect to home screen after auto-login
-      window.location.href = '/home';
-      logger.info('Registro y login automático completados exitosamente', { userId: response.user.id, email: response.user.email });
+      // No auto-login after registration - user should go to login screen
+      logger.info('Registro completado exitosamente', { email: data.email });
     } catch (error) {
       const errorMessage = getErrorMessage(error);
       logger.error('Error en registro', { 
@@ -177,7 +161,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       logger.debug('Información del usuario refrescada exitosamente');
     } catch (error) {
       logger.error('Error al refrescar usuario:', error);
-      setUser(null);
+      // Solo establecer user a null si es un error de autenticación (401)
+      if (error instanceof Error && 'response' in error && 
+          typeof error.response === 'object' && error.response !== null &&
+          'status' in error.response && error.response.status === 401) {
+        setUser(null);
+      }
     }
   }, []);
 

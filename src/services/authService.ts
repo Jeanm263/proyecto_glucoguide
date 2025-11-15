@@ -100,8 +100,14 @@ export const authService = {
    */
   logout(): void {
     logger.info('Cerrando sesión de usuario');
-    // En el caso de cookies, podríamos hacer una llamada al backend
+    // En el caso de cookies, hacemos una llamada al backend
     // para eliminar la cookie de sesión
+    apiClient.post('/auth/logout')
+      .catch(error => {
+        logger.error('Error al cerrar sesión en el backend', { 
+          error: error instanceof Error ? error.message : 'Unknown error'
+        });
+      });
     // La redirección se manejará en el contexto de autenticación
   },
 
@@ -124,6 +130,7 @@ export const authService = {
       logger.error('Error al obtener usuario actual', { 
         error: error instanceof Error ? error.message : 'Unknown error'
       });
+      // Lanzar el error para que el contexto de autenticación pueda manejarlo correctamente
       throw error;
     }
   },
