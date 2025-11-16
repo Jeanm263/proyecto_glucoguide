@@ -71,6 +71,10 @@ apiClient.interceptors.response.use(
       console.error('Sin respuesta del servidor. Verifica tu conexión a internet.');
       // Mostrar más detalles del error
       console.error('Detalles del error de red:', error);
+      // Verificar si es un problema de CORS
+      if (error instanceof XMLHttpRequest && error.status === 0) {
+        console.error('Posible problema de CORS o conexión de red');
+      }
     } else {
       // Algo pasó al configurar la petición
       console.error('Error al configurar la petición:', error.message);
