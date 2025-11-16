@@ -29,17 +29,8 @@ export const RegisterScreen: React.FC = () => {
     
     try {
       await register({ name, email, password });
-      
-      // Detectar si estamos en un entorno móvil (Capacitor)
-      const isMobile = typeof (window as unknown as { Capacitor?: unknown }).Capacitor !== 'undefined';
-      
-      if (isMobile) {
-        // En entornos móviles, redirigir al login después del registro
-        navigate('/login');
-      } else {
-        // After successful registration with auto-login, redirect to home screen
-        navigate('/home');
-      }
+      // After successful registration with auto-login, redirect to home screen
+      navigate('/home');
     } catch (error) {
       console.error('Error en registro:', error);
       setError('Error al crear la cuenta. Por favor, inténtalo de nuevo.');

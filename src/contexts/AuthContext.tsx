@@ -32,18 +32,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
    * Verificar autenticación al montar el componente
    */
   useEffect(() => {
-    // Detectar si estamos en un entorno móvil (Capacitor)
-    const isMobile = typeof (window as unknown as { Capacitor?: unknown }).Capacitor !== 'undefined';
-    
     const checkAuth = async () => {
-      // No verificar autenticación automáticamente en entornos móviles
-      if (isMobile) {
-        logger.debug('Entorno móvil detectado, no verificando autenticación automáticamente');
-        setUser(null);
-        setIsLoading(false);
-        return;
-      }
-      
       // Solo verificar autenticación si no estamos usando el servicio mock
       // y no estamos en un entorno de pruebas
       const isTestEnv = typeof process !== 'undefined' && process.env && process.env.NODE_ENV === 'test';
@@ -129,21 +118,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const response: AuthResponse = await authService.register(data);
       toastSuccess('¡Cuenta creada exitosamente!');
       
-      // Detectar si estamos en un entorno móvil (Capacitor)
-      const isMobile = typeof (window as unknown as { Capacitor?: unknown }).Capacitor !== 'undefined';
+      // Auto-login after registration as per project requirements
+      setUser({
+        id: response.user.id,
+        name: response.user.name,
+        email: response.user.email,
+        age: response.user.age,
+        diabetesType: response.user.diabetesType,
+      });
       
-      // Auto-login after registration as per project requirements, except in mobile environments
-      if (!isMobile) {
-        setUser({
-          id: response.user.id,
-          name: response.user.name,
-          email: response.user.email,
-          age: response.user.age,
-          diabetesType: response.user.diabetesType,
-        });
-        
-        logger.info('Registro y login automático completados exitosamente', { userId: response.user.id, email: response.user.email });
-      }
+      logger.info('Registro y login automático completados exitosamente', { userId: response.user.id, email: response.user.email });
     } catch (error) {
       const errorMessage = getErrorMessage(error);
       logger.error('Error en registro', { 

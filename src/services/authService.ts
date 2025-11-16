@@ -44,7 +44,17 @@ export const authService = {
     try {
       logger.info('Iniciando proceso de login', { email: credentials.email });
       const response = await apiClient.post('/auth/login', credentials);
-      const { user } = response.data;
+      const userData = response.data.user || response.data;
+      
+      // Asegurarse de que el ID esté correctamente mapeado
+      const user: User = {
+        id: userData.id || userData._id,
+        name: userData.name,
+        email: userData.email,
+        age: userData.age,
+        diabetesType: userData.diabetesType,
+        glucoseLevel: userData.glucoseLevel
+      };
       
       logger.info('Login exitoso', { userId: user.id, email: user.email });
       
@@ -76,7 +86,17 @@ export const authService = {
     try {
       logger.info('Iniciando proceso de registro', { email: data.email });
       const response = await apiClient.post('/auth/register', data);
-      const { user } = response.data;
+      const userData = response.data.user || response.data;
+      
+      // Asegurarse de que el ID esté correctamente mapeado
+      const user: User = {
+        id: userData.id || userData._id,
+        name: userData.name,
+        email: userData.email,
+        age: userData.age,
+        diabetesType: userData.diabetesType,
+        glucoseLevel: userData.initialGlucoseLevel || userData.glucoseLevel
+      };
       
       logger.info('Registro exitoso', { userId: user.id, email: user.email });
       
@@ -124,8 +144,20 @@ export const authService = {
     try {
       logger.debug('Obteniendo información del usuario actual');
       const response = await apiClient.get('/auth/me');
+      const userData = response.data.user || response.data;
+      
+      // Asegurarse de que el ID esté correctamente mapeado
+      const user: User = {
+        id: userData.id || userData._id,
+        name: userData.name,
+        email: userData.email,
+        age: userData.age,
+        diabetesType: userData.diabetesType,
+        glucoseLevel: userData.glucoseLevel
+      };
+      
       logger.debug('Información del usuario obtenida exitosamente');
-      return response.data.user;
+      return user;
     } catch (error) {
       logger.error('Error al obtener usuario actual', { 
         error: error instanceof Error ? error.message : 'Unknown error'
@@ -139,15 +171,6 @@ export const authService = {
    * Verificar si hay un token válido
    */
   async isAuthenticated(): Promise<boolean> {
-    // Detectar si estamos en un entorno móvil (Capacitor)
-    const isMobile = typeof (window as unknown as { Capacitor?: unknown }).Capacitor !== 'undefined';
-    
-    // No verificar autenticación automáticamente en entornos móviles
-    if (isMobile) {
-      logger.debug('Entorno móvil detectado, no verificando autenticación automáticamente');
-      return false;
-    }
-    
     if (USE_MOCK_SERVICE) {
       // Para desarrollo, asumimos que no estamos autenticados
       return false;
