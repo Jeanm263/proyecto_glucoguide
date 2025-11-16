@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BottomNavigation } from '../../components/common/BottomNavigation';
 import { AddFoodModal } from '../../components/nutrition/AddFoodModal';
 import type { FoodItem } from '../../types/food';
 
@@ -88,11 +87,6 @@ export const FoodTrackingScreen: React.FC = () => {
     .filter(entry => entry.date === selectedDate)
     .reduce((sum, entry) => sum + entry.food.fiber, 0);
 
-  const formatTrafficLight = (value: number, threshold: number) => {
-    if (value <= threshold * 0.5) return '🟢'; // Bajo
-    if (value <= threshold * 0.8) return '🟡'; // Medio
-    return '🔴'; // Alto
-  };
 
   // Filtrar alimentos por fecha seleccionada y agrupar por hora
   const filteredEntries = foodEntries.filter(entry => entry.date === selectedDate);
@@ -106,576 +100,336 @@ export const FoodTrackingScreen: React.FC = () => {
   }, {} as Record<string, FoodEntry[]>);
 
   return (
-    <div className="tracking-page">
-      {/* Header */}
-      <header className="tracking-header">
-        <div className="tracking-header-content">
-          <button
-            onClick={() => navigate('/home')}
-            className="btn-back"
-            aria-label="Volver al inicio"
-          >
-            <span aria-hidden="true">←</span> Inicio
-          </button>
-          <h1 className="tracking-title">
-            <span aria-hidden="true">📝</span> Seguimiento
-          </h1>
-        </div>
-      </header>
-
-      {/* Content */}
-      <div className="tracking-content fade-in">
-        {/* Date Selector */}
-        <div className="date-selector">
-          <label htmlFor="date-input" className="date-label">
-            Fecha:
-          </label>
-          <input
-            id="date-input"
-            type="date"
-            value={selectedDate}
-            onChange={(e) => setSelectedDate(e.target.value)}
-            className="date-input"
-          />
-        </div>
-
-        {/* Summary Cards */}
-        <div className="summary-grid">
-          <div className="summary-card">
-            <div className="summary-icon">📊</div>
-            <div className="summary-info">
-              <h3 className="summary-title">Carbohidratos</h3>
-              <p className="summary-value">{totalCarbs}g</p>
-            </div>
-          </div>
-          
-          <div className="summary-card">
-            <div className="summary-icon">🌾</div>
-            <div className="summary-info">
-              <h3 className="summary-title">Fibra</h3>
-              <p className="summary-value">{totalFiber}g</p>
-            </div>
+    <div className="container" style={{ padding: 'var(--spacing-md)' }}>
+      <div className="modern-card">
+        {/* Header */}
+        <div style={{ 
+          background: 'linear-gradient(135deg, var(--primary-500) 0%, var(--primary-700) 100%)',
+          padding: 'var(--spacing-lg)',
+          borderRadius: 'var(--radius-lg) var(--radius-lg) 0 0',
+          marginBottom: 'var(--spacing-md)'
+        }}>
+          <div style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: 'var(--spacing-sm)' 
+          }}>
+            <button
+              onClick={() => navigate('/home')}
+              className="modern-btn modern-btn-ghost"
+              style={{ 
+                color: 'white',
+                border: '1px solid rgba(255,255,255,0.3)',
+                padding: 'var(--spacing-xs) var(--spacing-sm)'
+              }}
+              aria-label="Volver al inicio"
+            >
+              <span aria-hidden="true">←</span> Inicio
+            </button>
+            <h1 style={{ 
+              color: 'white',
+              margin: 0,
+              fontSize: '1.5rem',
+              flex: 1,
+              textAlign: 'center'
+            }}>
+              <span aria-hidden="true">📝</span> Seguimiento
+            </h1>
+            <div style={{ width: '80px' }}></div> {/* Espacio para balancear */}
           </div>
         </div>
 
-        {/* Add Food Button */}
-        <div className="add-food-section">
-          <button
-            onClick={() => setShowAddModal(true)}
-            className="btn-add-food"
-            aria-label="Agregar alimento"
-          >
-            <span aria-hidden="true">+</span> Agregar Alimento
-          </button>
-        </div>
+        {/* Content */}
+        <div>
+          {/* Date Selector */}
+          <div className="modern-card" style={{ 
+            marginBottom: 'var(--spacing-lg)',
+            padding: 'var(--spacing-md)'
+          }}>
+            <div style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: 'var(--spacing-sm)' 
+            }}>
+              <label htmlFor="date-input" style={{ 
+                fontWeight: 600, 
+                color: 'var(--neutral-700)',
+                fontSize: '1rem',
+                whiteSpace: 'nowrap'
+              }}>
+                Fecha:
+              </label>
+              <input
+                id="date-input"
+                type="date"
+                value={selectedDate}
+                onChange={(e) => setSelectedDate(e.target.value)}
+                className="modern-form-input"
+                style={{ flex: 1 }}
+              />
+            </div>
+          </div>
 
-        {/* Food Entries */}
-        <div className="entries-section">
-          <h2 className="entries-title">Alimentos de hoy</h2>
-          
-          {loading ? (
-            <div className="loading-state">
-              <div className="loading-spinner">⏳</div>
-              <p className="loading-message">Cargando registros...</p>
+          {/* Summary Cards */}
+          <div style={{ 
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr',
+            gap: 'var(--spacing-md)',
+            marginBottom: 'var(--spacing-lg)'
+          }}>
+            <div className="modern-card" style={{ 
+              display: 'flex',
+              alignItems: 'center',
+              gap: 'var(--spacing-sm)'
+            }}>
+              <div style={{ fontSize: '1.5rem' }}>📊</div>
+              <div style={{ flex: 1 }}>
+                <h3 style={{ 
+                  fontSize: '0.875rem',
+                  color: 'var(--neutral-600)',
+                  margin: 0,
+                  fontWeight: 500
+                }}>
+                  Carbohidratos
+                </h3>
+                <p style={{ 
+                  fontSize: '1.5rem',
+                  fontWeight: 700,
+                  color: 'var(--neutral-900)',
+                  margin: 'var(--spacing-xs) 0 0 0'
+                }}>
+                  {totalCarbs}g
+                </p>
+              </div>
             </div>
-          ) : filteredEntries.length === 0 ? (
-            <div className="empty-state">
-              <div className="empty-icon">🍽️</div>
-              <p className="empty-message">No has registrado alimentos hoy</p>
-              <p className="empty-hint">Agrega tu primer alimento</p>
+            
+            <div className="modern-card" style={{ 
+              display: 'flex',
+              alignItems: 'center',
+              gap: 'var(--spacing-sm)'
+            }}>
+              <div style={{ fontSize: '1.5rem' }}>🌾</div>
+              <div style={{ flex: 1 }}>
+                <h3 style={{ 
+                  fontSize: '0.875rem',
+                  color: 'var(--neutral-600)',
+                  margin: 0,
+                  fontWeight: 500
+                }}>
+                  Fibra
+                </h3>
+                <p style={{ 
+                  fontSize: '1.5rem',
+                  fontWeight: 700,
+                  color: 'var(--neutral-900)',
+                  margin: 'var(--spacing-xs) 0 0 0'
+                }}>
+                  {totalFiber}g
+                </p>
+              </div>
             </div>
-          ) : (
-            <div className="entries-list">
-              {Object.keys(groupedEntries)
-                .sort()
-                .map((time) => (
-                  <div key={time} className="time-group">
-                    <div className="time-header">
-                      <h3 className="time-title">⏰ {time}</h3>
-                    </div>
-                    {groupedEntries[time].map((entry) => (
-                      <div key={entry.id} className="entry-card">
-                        <div className="entry-header">
-                          <div className="entry-time">{entry.time}</div>
-                          <button
-                            onClick={() => handleDeleteFood(entry.id)}
-                            className="btn-delete"
-                            aria-label={`Eliminar ${entry.food.name}`}
-                          >
-                            ×
-                          </button>
-                        </div>
-                        <div className="entry-content">
-                          <h3 className="entry-food-name">{entry.food.name}</h3>
-                          <p className="entry-portion">{entry.portion}</p>
-                          <div className="entry-nutrition">
-                            <span className="nutrition-item">
-                              Carbs: <strong>{formatTrafficLight(entry.food.carbohydrates, 20)} {entry.food.carbohydrates}g</strong>
-                            </span>
-                            <span className="nutrition-item">
-                              Fibra: <strong>{formatTrafficLight(entry.food.fiber, 5)} {entry.food.fiber}g</strong>
-                            </span>
-                            <span className="nutrition-item">
-                              Azúcares: <strong>{formatTrafficLight(entry.food.sugars, 10)} {entry.food.sugars}g</strong>
-                            </span>
-                          </div>
-                          <div className="entry-category">
-                            <span className={`category-tag ${entry.food.category}`}>
-                              {entry.food.category}
-                            </span>
-                            <span className="glycemic-index">
-                              IG: {entry.food.glycemicIndex}
-                            </span>
-                          </div>
-                        </div>
+          </div>
+
+          {/* Add Food Button */}
+          <div style={{ 
+            textAlign: 'center',
+            marginBottom: 'var(--spacing-lg)'
+          }}>
+            <button
+              onClick={() => setShowAddModal(true)}
+              className="modern-btn modern-btn-primary"
+              style={{ 
+                padding: 'var(--spacing-md) var(--spacing-lg)',
+                fontSize: '1rem',
+                fontWeight: 600,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 'var(--spacing-sm)'
+              }}
+              aria-label="Agregar alimento"
+            >
+              <span aria-hidden="true">+</span> Agregar Alimento
+            </button>
+          </div>
+
+          {/* Food Entries */}
+          <div className="modern-card">
+            <h2 style={{ 
+              fontSize: '1.25rem',
+              fontWeight: 700,
+              color: 'var(--neutral-900)',
+              margin: 0,
+              marginBottom: 'var(--spacing-md)'
+            }}>
+              Alimentos de hoy
+            </h2>
+            
+            {loading ? (
+              <div style={{ 
+                textAlign: 'center',
+                padding: 'var(--spacing-xl) var(--spacing-md)'
+              }}>
+                <div style={{ 
+                  fontSize: '2rem',
+                  marginBottom: 'var(--spacing-md)',
+                  animation: 'spin 1s linear infinite'
+                }}>
+                  ⏳
+                </div>
+                <p style={{ 
+                  fontSize: '1rem',
+                  color: 'var(--neutral-600)',
+                  margin: 0
+                }}>
+                  Cargando registros...
+                </p>
+              </div>
+            ) : filteredEntries.length === 0 ? (
+              <div style={{ 
+                textAlign: 'center',
+                padding: 'var(--spacing-xl)',
+                color: 'var(--neutral-600)'
+              }}>
+                <div style={{ 
+                  fontSize: '3rem',
+                  marginBottom: 'var(--spacing-md)'
+                }}>
+                  🍽️
+                </div>
+                <p style={{ 
+                  margin: '0 0 var(--spacing-sm) 0',
+                  fontSize: '1.1rem'
+                }}>
+                  No has registrado alimentos hoy
+                </p>
+                <p style={{ 
+                  margin: 0,
+                  fontSize: '0.9rem'
+                }}>
+                  Agrega tu primer alimento
+                </p>
+              </div>
+            ) : (
+              <div style={{ 
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 'var(--spacing-lg)'
+              }}>
+                {Object.keys(groupedEntries)
+                  .sort()
+                  .map((time) => (
+                    <div key={time}>
+                      <div style={{ 
+                        marginBottom: 'var(--spacing-md)',
+                        paddingBottom: 'var(--spacing-xs)',
+                        borderBottom: '1px solid var(--neutral-200)'
+                      }}>
+                        <h3 style={{ 
+                          fontSize: '1rem',
+                          fontWeight: 600,
+                          color: 'var(--neutral-800)',
+                          margin: 0,
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 'var(--spacing-xs)'
+                        }}>
+                          ⏰ {time}
+                        </h3>
                       </div>
-                    ))}
-                  </div>
-                ))}
-            </div>
-          )}
+                      {groupedEntries[time].map((entry) => (
+                        <div key={entry.id} className="modern-card" style={{ 
+                          padding: 'var(--spacing-md)',
+                          marginBottom: 'var(--spacing-sm)'
+                        }}>
+                          <div style={{ 
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'flex-start',
+                            marginBottom: 'var(--spacing-sm)'
+                          }}>
+                            <div style={{ 
+                              fontSize: '0.875rem',
+                              color: 'var(--neutral-600)',
+                              backgroundColor: 'var(--neutral-100)',
+                              padding: 'var(--spacing-xs) var(--spacing-sm)',
+                              borderRadius: 'var(--radius-md)'
+                            }}>
+                              {entry.time}
+                            </div>
+                            <button
+                              onClick={() => handleDeleteFood(entry.id)}
+                              className="modern-btn modern-btn-ghost"
+                              style={{ 
+                                padding: 'var(--spacing-xs)',
+                                color: 'var(--accent-danger)',
+                                minWidth: 'auto'
+                              }}
+                              aria-label={`Eliminar ${entry.food.name}`}
+                            >
+                              🗑️
+                            </button>
+                          </div>
+                          
+                          <div style={{ 
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center'
+                          }}>
+                            <div>
+                              <h4 style={{ 
+                                fontSize: '1rem',
+                                fontWeight: 600,
+                                color: 'var(--neutral-900)',
+                                margin: 0
+                              }}>
+                                {entry.food.name}
+                              </h4>
+                              <p style={{ 
+                                fontSize: '0.875rem',
+                                color: 'var(--neutral-600)',
+                                margin: 'var(--spacing-xs) 0 0 0'
+                              }}>
+                                {entry.portion} porción
+                              </p>
+                            </div>
+                            
+                            <div style={{ 
+                              textAlign: 'right'
+                            }}>
+                              <p style={{ 
+                                fontSize: '0.875rem',
+                                fontWeight: 600,
+                                color: 'var(--neutral-800)',
+                                margin: 0
+                              }}>
+                                {entry.food.carbohydrates}g carbs
+                              </p>
+                              <p style={{ 
+                                fontSize: '0.75rem',
+                                color: 'var(--neutral-600)',
+                                margin: 'var(--spacing-xs) 0 0 0'
+                              }}>
+                                {entry.food.fiber}g fibra
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
       {/* Add Food Modal */}
       {showAddModal && (
         <AddFoodModal
-          onClose={() => setShowAddModal(false)}
           onAdd={handleAddFood}
+          onClose={() => setShowAddModal(false)}
         />
       )}
-
-      {/* Bottom Navigation */}
-      <BottomNavigation />
-
-      <style>{`
-        .tracking-page {
-          min-height: 100vh;
-          background: #f5f7fa;
-          padding-bottom: 80px;
-        }
-
-        .tracking-header {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          padding: 24px 20px;
-          box-shadow: 0 2px 12px rgba(0,0,0,0.1);
-        }
-
-        .tracking-header-content {
-          max-width: 1200px;
-          margin: 0 auto;
-          display: flex;
-          align-items: center;
-          gap: 20px;
-        }
-
-        .btn-back {
-          background: rgba(255,255,255,0.2);
-          backdrop-filter: blur(10px);
-          border: 1px solid rgba(255,255,255,0.3);
-          border-radius: 12px;
-          padding: 10px 20px;
-          color: white;
-          cursor: pointer;
-          font-size: 16px;
-          font-weight: 600;
-          transition: all 0.3s ease;
-        }
-
-        .btn-back:hover {
-          background: rgba(255,255,255,0.3);
-          transform: translateX(-2px);
-        }
-
-        .tracking-title {
-          margin: 0;
-          font-size: 32px;
-          font-weight: 700;
-          color: white;
-          text-shadow: 0 2px 8px rgba(0,0,0,0.2);
-        }
-
-        .tracking-content {
-          max-width: 1200px;
-          margin: 0 auto;
-          padding: 30px 20px;
-        }
-
-        .date-selector {
-          background: white;
-          border-radius: 16px;
-          padding: 20px;
-          margin-bottom: 24px;
-          box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-          display: flex;
-          align-items: center;
-          gap: 16px;
-        }
-
-        .date-label {
-          font-weight: 600;
-          color: #333;
-          font-size: 16px;
-        }
-
-        .date-input {
-          padding: 12px 16px;
-          border: 2px solid #e0e0e0;
-          border-radius: 12px;
-          font-size: 16px;
-          outline: none;
-          transition: all 0.3s ease;
-        }
-
-        .date-input:focus {
-          border-color: #667eea;
-          box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-
-        .summary-grid {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 20px;
-          margin-bottom: 30px;
-        }
-
-        .summary-card {
-          background: white;
-          border-radius: 16px;
-          padding: 20px;
-          box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-          display: flex;
-          align-items: center;
-          gap: 16px;
-        }
-
-        .summary-icon {
-          font-size: 28px;
-        }
-
-        .summary-info {
-          flex: 1;
-        }
-
-        .summary-title {
-          font-size: 14px;
-          color: #999;
-          margin: 0 0 4px 0;
-          font-weight: 500;
-        }
-
-        .summary-value {
-          font-size: 24px;
-          font-weight: 700;
-          color: #333;
-          margin: 0;
-        }
-
-        .add-food-section {
-          text-align: center;
-          margin-bottom: 30px;
-        }
-
-        .btn-add-food {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          color: white;
-          border: none;
-          border-radius: 16px;
-          padding: 16px 32px;
-          font-size: 16px;
-          font-weight: 600;
-          cursor: pointer;
-          transition: all 0.3s ease;
-          display: inline-flex;
-          align-items: center;
-          gap: 12px;
-        }
-
-        .btn-add-food:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
-        }
-
-        .entries-section {
-          background: white;
-          border-radius: 20px;
-          padding: 24px;
-          box-shadow: 0 4px 20px rgba(0,0,0,0.06);
-        }
-
-        .entries-title {
-          font-size: 24px;
-          font-weight: 700;
-          color: #333;
-          margin: 0 0 20px 0;
-        }
-
-        .loading-state {
-          text-align: center;
-          padding: 40px 20px;
-        }
-
-        .loading-spinner {
-          font-size: 40px;
-          margin-bottom: 16px;
-          animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-
-        .loading-message {
-          font-size: 16px;
-          color: #666;
-          margin: 0;
-        }
-
-        .time-group {
-          margin-bottom: 24px;
-        }
-
-        .time-group:last-child {
-          margin-bottom: 0;
-        }
-
-        .time-header {
-          margin-bottom: 16px;
-          padding-bottom: 8px;
-          border-bottom: 2px solid #f0f0f0;
-        }
-
-        .time-title {
-          font-size: 20px;
-          font-weight: 600;
-          color: #667eea;
-          margin: 0;
-          display: flex;
-          align-items: center;
-          gap: 8px;
-        }
-
-        .entries-list {
-          display: flex;
-          flex-direction: column;
-          gap: 16px;
-        }
-
-        .entry-card {
-          border: 1px solid #e0e0e0;
-          border-radius: 16px;
-          padding: 16px;
-          transition: all 0.3s ease;
-        }
-
-        .entry-card:hover {
-          border-color: #667eea;
-          box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
-        }
-
-        .entry-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 12px;
-        }
-
-        .entry-time {
-          font-size: 14px;
-          font-weight: 600;
-          color: #667eea;
-          background: rgba(102, 126, 234, 0.1);
-          padding: 4px 12px;
-          border-radius: 20px;
-        }
-
-        .btn-delete {
-          background: #ff6b6b;
-          color: white;
-          border: none;
-          border-radius: 50%;
-          width: 28px;
-          height: 28px;
-          font-size: 18px;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          transition: all 0.3s ease;
-        }
-
-        .btn-delete:hover {
-          background: #ff5252;
-          transform: scale(1.1);
-        }
-
-        .entry-content {
-          display: flex;
-          flex-direction: column;
-          gap: 8px;
-        }
-
-        .entry-food-name {
-          font-size: 18px;
-          font-weight: 600;
-          color: #333;
-          margin: 0;
-        }
-
-        .entry-portion {
-          font-size: 14px;
-          color: #999;
-          margin: 0;
-        }
-
-        .entry-nutrition {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 16px;
-          margin-top: 4px;
-        }
-
-        .nutrition-item {
-          font-size: 14px;
-          color: #666;
-        }
-
-        .entry-category {
-          display: flex;
-          gap: 12px;
-          margin-top: 8px;
-        }
-
-        .category-tag {
-          padding: 4px 12px;
-          border-radius: 20px;
-          font-size: 12px;
-          font-weight: 500;
-          text-transform: capitalize;
-        }
-
-        .category-tag.frutas {
-          background: rgba(76, 175, 80, 0.1);
-          color: #4caf50;
-        }
-
-        .category-tag.verduras {
-          background: rgba(255, 193, 7, 0.1);
-          color: #ff9800;
-        }
-
-        .category-tag.cereales {
-          background: rgba(33, 150, 243, 0.1);
-          color: #2196f3;
-        }
-
-        .category-tag.proteinas {
-          background: rgba(156, 39, 176, 0.1);
-          color: #9c27b0;
-        }
-
-        .category-tag.lacteos {
-          background: rgba(255, 152, 0, 0.1);
-          color: #ff9800;
-        }
-
-        .category-tag.grasas {
-          background: rgba(121, 85, 72, 0.1);
-          color: #795548;
-        }
-
-        .category-tag.endulzantes {
-          background: rgba(244, 67, 54, 0.1);
-          color: #f44336;
-        }
-
-        .category-tag.legumbres {
-          background: rgba(139, 195, 74, 0.1);
-          color: #8bc34a;
-        }
-
-        .glycemic-index {
-          font-size: 12px;
-          color: #666;
-          background: #f5f5f5;
-          padding: 4px 8px;
-          border-radius: 12px;
-          font-weight: 500;
-        }
-
-        .empty-state {
-          text-align: center;
-          padding: 40px 20px;
-        }
-
-        .empty-icon {
-          font-size: 60px;
-          margin-bottom: 16px;
-          opacity: 0.5;
-        }
-
-        .empty-message {
-          font-size: 18px;
-          font-weight: 600;
-          color: #333;
-          margin: 0 0 8px 0;
-        }
-
-        .empty-hint {
-          font-size: 14px;
-          color: #999;
-          margin: 0;
-        }
-
-        @media (max-width: 768px) {
-          .summary-grid {
-            grid-template-columns: 1fr;
-          }
-
-          .tracking-title {
-            font-size: 24px;
-          }
-
-          .tracking-page {
-            padding-bottom: 90px;
-          }
-
-          .date-selector {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 12px;
-          }
-
-          .entry-nutrition {
-            flex-direction: column;
-            gap: 4px;
-          }
-
-          .entry-category {
-            flex-direction: column;
-            gap: 8px;
-          }
-
-          .time-header {
-            text-align: center;
-          }
-        }
-
-        @media (max-width: 480px) {
-          .tracking-content {
-            padding: 20px 16px;
-          }
-
-          .summary-card {
-            padding: 16px;
-          }
-
-          .summary-value {
-            font-size: 20px;
-          }
-        }
-      `}</style>
     </div>
   );
 };

@@ -8,7 +8,6 @@ import type { EducationContent } from '../../types/education';
 import { educationService } from '../../services/educationService';
 import { USE_MOCK_SERVICE } from '../../config/env';
 import { toastError } from '../../utils/toast';
-import { BottomNavigation } from '../../components/common/BottomNavigation';
 
 type EducationLevel = 'basic' | 'intermediate' | 'advanced';
 
@@ -97,121 +96,214 @@ export const EducationScreen: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="education-page">
-        <div className="loading-container">
-          <div className="spinner"></div>
-          <p>Cargando contenido educativo...</p>
-        </div>
-        <style>{`
-          .loading-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            background: #f5f7fa;
-          }
-          
-          .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #764ba2;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 20px;
-          }
-          
-          @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-          }
-        `}</style>
+      <div style={{ 
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: '100vh',
+        background: 'var(--neutral-50)',
+        padding: 'var(--spacing-md)'
+      }}>
+        <div className="spinner"></div>
+        <p style={{ 
+          color: 'var(--neutral-600)',
+          margin: 'var(--spacing-md) 0 0 0'
+        }}>
+          Cargando contenido educativo...
+        </p>
       </div>
     );
   }
 
   return (
-    <div className="education-page">
-      {/* Header */}
-      <header className="education-header">
-        <div className="education-header-content">
-          <button
-            onClick={() => navigate('/home')}
-            className="btn-back"
-            aria-label="Volver al inicio"
-          >
-            <span aria-hidden="true">←</span> Inicio
-          </button>
-          <h1 className="education-title">
-            <span aria-hidden="true">📚</span> Educación en Diabetes
-          </h1>
-        </div>
-      </header>
-
-      {/* Content */}
-      <div className="education-content fade-in">
-        {/* Search and Filters */}
-        <div className="search-card" role="search">
-          <label htmlFor="education-search-input" className="sr-only">
-            Buscar contenido educativo
-          </label>
-          <input
-            id="education-search-input"
-            type="text"
-            placeholder="Buscar artículos, videos, etc..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="search-input"
-            aria-label="Buscar contenido educativo por título o tags"
-          />
-
-          <div className="level-filters" role="group" aria-label="Filtros por nivel">
-            {levels.map(level => (
-              <button
-                key={level}
-                onClick={() => setSelectedLevel(level)}
-                className={`level-btn ${selectedLevel === level ? 'active' : ''}`}
-                aria-pressed={selectedLevel === level}
-              >
-                {level === 'todos' ? 'Todos' : EDUCATION_CATEGORIES[level as keyof typeof EDUCATION_CATEGORIES]}
-              </button>
-            ))}
+    <div className="container" style={{ padding: 'var(--spacing-md)' }}>
+      <div className="modern-card">
+        {/* Header */}
+        <div style={{ 
+          background: 'linear-gradient(135deg, var(--primary-700) 0%, var(--primary-500) 100%)',
+          padding: 'var(--spacing-lg)',
+          borderRadius: 'var(--radius-lg) var(--radius-lg) 0 0',
+          marginBottom: 'var(--spacing-md)'
+        }}>
+          <div style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: 'var(--spacing-sm)' 
+          }}>
+            <button
+              onClick={() => navigate('/home')}
+              className="modern-btn modern-btn-ghost"
+              style={{ 
+                color: 'white',
+                border: '1px solid rgba(255,255,255,0.3)',
+                padding: 'var(--spacing-xs) var(--spacing-sm)'
+              }}
+              aria-label="Volver al inicio"
+            >
+              <span aria-hidden="true">←</span> Inicio
+            </button>
+            <h1 style={{ 
+              color: 'white',
+              margin: 0,
+              fontSize: '1.5rem',
+              flex: 1,
+              textAlign: 'center'
+            }}>
+              <span aria-hidden="true">📚</span> Educación en Diabetes
+            </h1>
+            <div style={{ width: '80px' }}></div> {/* Espacio para balancear */}
           </div>
         </div>
 
-        {/* Error message */}
-        {error && (
-          <div className="error-message" role="alert">
-            <p>{error}</p>
-          </div>
-        )}
+        {/* Content */}
+        <div>
+          {/* Search and Filters */}
+          <div className="modern-card" style={{ 
+            marginBottom: 'var(--spacing-lg)',
+            padding: 'var(--spacing-lg)'
+          }}>
+            <label htmlFor="education-search-input" className="sr-only">
+              Buscar contenido educativo
+            </label>
+            <div style={{ position: 'relative', marginBottom: 'var(--spacing-md)' }}>
+              <input
+                id="education-search-input"
+                type="text"
+                placeholder="Buscar artículos, videos, etc..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="modern-form-input"
+                style={{ 
+                  width: '100%',
+                  paddingLeft: 'var(--spacing-xl)',
+                  paddingRight: searchQuery ? 'var(--spacing-xl)' : 'var(--spacing-md)'
+                }}
+                aria-label="Buscar contenido educativo por título o tags"
+              />
+              <span style={{ 
+                position: 'absolute',
+                left: 'var(--spacing-sm)',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                color: 'var(--neutral-500)'
+              }}>
+                🔍
+              </span>
+              {searchQuery && (
+                <button 
+                  style={{ 
+                    position: 'absolute',
+                    right: 'var(--spacing-sm)',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    color: 'var(--neutral-500)',
+                    fontSize: '1.2rem'
+                  }}
+                  onClick={() => setSearchQuery('')}
+                  aria-label="Limpiar búsqueda"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
 
-        {/* Results */}
-        <div className="results-header">
-          <h2 className="results-title">
-            Resultados <span className="results-count">({filteredContent.length})</span>
-          </h2>
-        </div>
-
-        {filteredContent.length === 0 ? (
-          <div className="empty-state" role="status" aria-live="polite">
-            <div className="empty-icon" aria-hidden="true">📖</div>
-            <p className="empty-message">No se encontró contenido con esos criterios</p>
-            <p className="empty-hint">Intenta con otros términos de búsqueda</p>
+            <div style={{ 
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: 'var(--spacing-sm)'
+            }} role="group" aria-label="Filtros por nivel">
+              {levels.map(level => (
+                <button
+                  key={level}
+                  onClick={() => setSelectedLevel(level)}
+                  className={`modern-btn ${selectedLevel === level ? 'modern-btn-primary' : 'modern-btn-outline'}`}
+                  style={{ 
+                    padding: 'var(--spacing-xs) var(--spacing-md)',
+                    fontSize: '0.875rem'
+                  }}
+                  aria-pressed={selectedLevel === level}
+                >
+                  {level === 'todos' ? 'Todos' : EDUCATION_CATEGORIES[level as keyof typeof EDUCATION_CATEGORIES]}
+                </button>
+              ))}
+            </div>
           </div>
-        ) : (
-          <div className="education-list" role="list" aria-labelledby="education-results-heading">
-            {filteredContent.map(content => (
-              <div key={content.id} role="listitem">
+
+          {/* Error message */}
+          {error && (
+            <div className="modern-alert modern-alert-error" role="alert">
+              <p>{error}</p>
+            </div>
+          )}
+
+          {/* Results */}
+          <div style={{ 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center',
+            marginBottom: 'var(--spacing-md)'
+          }}>
+            <h2 style={{ 
+              fontSize: '1.5rem',
+              fontWeight: 700,
+              color: 'var(--neutral-900)',
+              margin: 0
+            }}>
+              Resultados <span style={{ color: 'var(--primary-600)' }}>({filteredContent.length})</span>
+            </h2>
+          </div>
+
+          {filteredContent.length === 0 ? (
+            <div style={{ 
+              background: 'white',
+              borderRadius: 'var(--radius-lg)',
+              padding: 'var(--spacing-xl)',
+              textAlign: 'center',
+              boxShadow: 'var(--shadow-md)'
+            }} role="status" aria-live="polite">
+              <div style={{ 
+                fontSize: '4rem',
+                marginBottom: 'var(--spacing-md)',
+                opacity: 0.5
+              }} aria-hidden="true">
+                📖
+              </div>
+              <p style={{ 
+                fontSize: '1.25rem',
+                fontWeight: 600,
+                color: 'var(--neutral-800)',
+                margin: '0 0 var(--spacing-sm) 0'
+              }}>
+                No se encontró contenido con esos criterios
+              </p>
+              <p style={{ 
+                fontSize: '1rem',
+                color: 'var(--neutral-600)',
+                margin: 0
+              }}>
+                Intenta con otros términos de búsqueda o cambia los filtros
+              </p>
+            </div>
+          ) : (
+            <div style={{ 
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 'var(--spacing-md)'
+            }}>
+              {filteredContent.map((content) => (
                 <EducationCard
+                  key={content.id}
                   content={content}
                   onPress={() => handleContentPress(content)}
                 />
-              </div>
-            ))}
-          </div>
-        )}
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Education Detail Modal */}
@@ -221,211 +313,6 @@ export const EducationScreen: React.FC = () => {
           onClose={() => setSelectedContent(null)}
         />
       )}
-      
-      {/* Bottom Navigation */}
-      <BottomNavigation />
-
-      <style>{`
-        .education-page {
-          min-height: 100vh;
-          background: #f5f7fa;
-          padding-bottom: 80px; /* Espacio para la navegación inferior */
-        }
-
-        .education-header {
-          background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
-          padding: 24px 20px;
-          box-shadow: 0 2px 12px rgba(0,0,0,0.1);
-        }
-
-        .education-header-content {
-          max-width: 1200px;
-          margin: 0 auto;
-          display: flex;
-          align-items: center;
-          gap: 20px;
-        }
-
-        .btn-back {
-          background: rgba(255,255,255,0.2);
-          backdrop-filter: blur(10px);
-          border: 1px solid rgba(255,255,255,0.3);
-          border-radius: 12px;
-          padding: 10px 20px;
-          color: white;
-          cursor: pointer;
-          font-size: 16px;
-          font-weight: 600;
-          transition: all 0.3s ease;
-        }
-
-        .btn-back:hover {
-          background: rgba(255,255,255,0.3);
-          transform: translateX(-2px);
-        }
-
-        .education-title {
-          margin: 0;
-          font-size: 32px;
-          font-weight: 700;
-          color: white;
-          text-shadow: 0 2px 8px rgba(0,0,0,0.2);
-        }
-
-        .education-content {
-          max-width: 1200px;
-          margin: 0 auto;
-          padding: 30px 20px;
-        }
-
-        .search-card {
-          background: white;
-          border-radius: 20px;
-          padding: 32px;
-          margin-bottom: 30px;
-          box-shadow: 0 4px 20px rgba(0,0,0,0.06);
-        }
-
-        .search-input {
-          width: 100%;
-          padding: 16px 20px;
-          font-size: 16px;
-          border: 2px solid #e0e0e0;
-          border-radius: 16px;
-          outline: none;
-          transition: all 0.3s ease;
-          background: #fafafa;
-          margin-bottom: 20px;
-          box-sizing: border-box;
-        }
-
-        .search-input:focus {
-          border-color: #764ba2;
-          background: white;
-          box-shadow: 0 0 0 4px rgba(118, 75, 162, 0.1);
-        }
-
-        .level-filters {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 12px;
-        }
-
-        .level-btn {
-          padding: 10px 20px;
-          border-radius: 20px;
-          border: 2px solid #e0e0e0;
-          background: white;
-          color: #666;
-          cursor: pointer;
-          font-size: 14px;
-          font-weight: 600;
-          text-transform: capitalize;
-          transition: all 0.3s ease;
-        }
-
-        .level-btn:hover {
-          border-color: #764ba2;
-          color: #764ba2;
-        }
-
-        .level-btn.active {
-          background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
-          color: white;
-          border-color: transparent;
-          transform: translateY(-2px);
-          box-shadow: 0 4px 12px rgba(118, 75, 162, 0.3);
-        }
-
-        .level-btn:focus {
-          outline: 3px solid #764ba2;
-          outline-offset: 2px;
-        }
-
-        .sr-only {
-          position: absolute;
-          width: 1px;
-          height: 1px;
-          padding: 0;
-          margin: -1px;
-          overflow: hidden;
-          clip: rect(0, 0, 0, 0);
-          white-space: nowrap;
-          border-width: 0;
-        }
-
-        .results-header {
-          margin-bottom: 24px;
-        }
-
-        .results-title {
-          font-size: 28px;
-          font-weight: 700;
-          color: #333;
-          margin: 0;
-        }
-
-        .results-count {
-          color: #764ba2;
-          font-weight: 600;
-        }
-
-        .education-list {
-          display: flex;
-          flex-direction: column;
-          gap: 16px;
-        }
-
-        .empty-state {
-          background: white;
-          border-radius: 20px;
-          padding: 80px 40px;
-          text-align: center;
-          box-shadow: 0 4px 20px rgba(0,0,0,0.06);
-        }
-
-        .empty-icon {
-          font-size: 80px;
-          margin-bottom: 24px;
-          opacity: 0.5;
-        }
-
-        .empty-message {
-          font-size: 20px;
-          font-weight: 600;
-          color: #333;
-          margin: 0 0 12px 0;
-        }
-
-        .empty-hint {
-          font-size: 16px;
-          color: #999;
-          margin: 0;
-        }
-
-        .error-message {
-          background: #f8d7da;
-          border: 1px solid #f5c6cb;
-          color: #721c24;
-          padding: 12px 16px;
-          border-radius: 8px;
-          margin-bottom: 20px;
-        }
-
-        @media (max-width: 768px) {
-          .search-card {
-            padding: 24px 20px;
-          }
-
-          .education-title {
-            font-size: 24px;
-          }
-          
-          .education-page {
-            padding-bottom: 90px; /* Ajustar para navegación móvil */
-          }
-        }
-      `}</style>
     </div>
   );
 };

@@ -6,7 +6,7 @@ const config: CapacitorConfig = {
   webDir: 'dist',
   server: {
     androidScheme: 'https',
-    hostname: 'glucosa-app-backend.onrender.com',
+    hostname: 'localhost',
     cleartext: false
   },
   android: {

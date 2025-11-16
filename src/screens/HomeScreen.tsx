@@ -1,212 +1,246 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import { useToast } from '../hooks/useToast';
 import { GlucoseChecker } from '../components/glucose/GlucoseChecker';
+import { ToastNotification } from '../components/common/ToastNotification';
+import { ThemeToggle } from '../components/common/ThemeToggle';
 
 export const HomeScreen: React.FC = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const { toasts, toastSuccess, toastInfo, removeToast } = useToast();
   const [showGlucoseChecker, setShowGlucoseChecker] = useState(false);
 
   const handleLogout = () => {
     logout();
+    toastSuccess('¡Sesión cerrada correctamente!');
+    // Navigate to login after logout
     navigate('/login');
   };
 
+  // Datos de ejemplo para las estadísticas
+  const stats = [
+    { title: "Nivel Promedio", value: "142 mg/dL", trend: "down", trendValue: "5%" },
+    { title: "Registros Hoy", value: "3", trend: "up", trendValue: "20%" },
+    { title: "Alimentos", value: "24" },
+    { title: "Objetivo", value: "90%", trend: "up", trendValue: "15%" },
+  ];
+
+  // Datos para las tarjetas de características
+  const features = [
+    {
+      title: "Buscar Alimentos",
+      description: "Consulta información nutricional",
+      icon: "🍎",
+      actionText: "Explorar",
+      onAction: () => {
+        navigate('/foods');
+        toastInfo('Abriendo buscador de alimentos...');
+      },
+    },
+    {
+      title: "Registrar Glucosa",
+      description: "Registra tus niveles de glucosa",
+      icon: "📊",
+      actionText: "Registrar",
+      onAction: () => {
+        setShowGlucoseChecker(!showGlucoseChecker);
+        toastInfo(showGlucoseChecker ? 'Ocultando verificador...' : 'Mostrando verificador de glucosa...');
+      },
+    },
+    {
+      title: "Educación",
+      description: "Aprende sobre diabetes",
+      icon: "📚",
+      actionText: "Aprender",
+      onAction: () => {
+        navigate('/education');
+        toastInfo('Abriendo sección educativa...');
+      },
+    },
+    {
+      title: "Perfil",
+      description: "Gestiona tu perfil",
+      icon: "👤",
+      actionText: "Configurar",
+      onAction: () => {
+        navigate('/profile');
+        toastInfo('Abriendo configuración de perfil...');
+      },
+    }
+  ];
+
   return (
-    <div className="home-screen">
-      <header className="home-header">
-        <h1>Bienvenido, {user?.name || 'Usuario'}</h1>
-        <button className="logout-btn" onClick={handleLogout}>
-          Cerrar Sesión
-        </button>
-      </header>
-
-      <main className="home-content">
-        <div className="welcome-section">
-          <h2>GlucosaGuide</h2>
-          <p>Tu compañero para el manejo de la diabetes tipo 2</p>
+    <div className="container" style={{ 
+      padding: 'var(--spacing-md)',
+      maxWidth: '100%',
+      position: 'relative'
+    }}>
+      {/* Toast Notifications */}
+      <ToastNotification toasts={toasts} onRemove={removeToast} />
+      
+      {/* Theme Toggle */}
+      <ThemeToggle />
+      
+      {/* Welcome Section */}
+      <div className="modern-card slide-in">
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center', 
+          flexWrap: 'wrap', 
+          gap: '10px' 
+        }}>
+          <div>
+            <h1 style={{ 
+              fontFamily: 'var(--font-family-heading)', 
+              fontSize: '1.5rem', 
+              fontWeight: 700, 
+              color: 'var(--neutral-900)',
+              margin: 0 
+            }}>
+              ¡Hola, {user?.name || 'Usuario'}!
+            </h1>
+            <p style={{ 
+              color: 'var(--neutral-600)', 
+              margin: '5px 0 0 0',
+              fontSize: '0.9rem'
+            }}>
+              {new Date().toLocaleDateString('es-ES', { 
+                weekday: 'long', 
+                day: 'numeric',
+                month: 'long'
+              })}
+            </p>
+          </div>
+          <button 
+            onClick={handleLogout}
+            className="modern-btn modern-btn-outline modern-btn-sm"
+            style={{ padding: '6px 10px' }}
+          >
+            Salir
+          </button>
         </div>
+      </div>
 
-        <button
-          className="btn-glucose-toggle"
-          onClick={() => setShowGlucoseChecker(!showGlucoseChecker)}
-        >
-          {showGlucoseChecker ? 'Ocultar Verificador' : 'Verificar Nivel de Glucosa'}
-          <span className="toggle-icon">{showGlucoseChecker ? '▲' : '▼'}</span>
-        </button>
-
-        {showGlucoseChecker && <GlucoseChecker />}
-
-        <div className="features-grid">
-          <div className="feature-card" onClick={() => navigate('/foods')}>
-            <span className="feature-icon">🍎</span>
-            <h3>Buscar Alimentos</h3>
-            <p>Consulta información nutricional de alimentos</p>
+      {/* Estadísticas principales */}
+      <div className="modern-stats-grid">
+        {stats.map((stat, index) => (
+          <div key={index} className="modern-stat-card fade-in" style={{ animationDelay: `${index * 0.1}s` }}>
+            <h3 className="modern-stat-title">{stat.title}</h3>
+            <p className="modern-stat-value">{stat.value}</p>
+            {stat.trend && (
+              <span className={`modern-stat-trend modern-stat-trend-${stat.trend}`}>
+                {stat.trend === 'up' ? '↑' : '↓'} {stat.trendValue}
+              </span>
+            )}
           </div>
+        ))}
+      </div>
 
-          <div className="feature-card" onClick={() => navigate('/food-tracking')}>
-            <span className="feature-icon">📝</span>
-            <h3>Seguimiento</h3>
-            <p>Registra tus comidas y niveles de glucosa</p>
+      {/* Verificador de glucosa */}
+      <div className="modern-card slide-in">
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center', 
+          flexWrap: 'wrap', 
+          gap: '15px',
+          marginBottom: showGlucoseChecker ? '15px' : '0'
+        }}>
+          <div>
+            <h2 className="modern-card-title" style={{ fontSize: '1.25rem' }}>Nivel de Glucosa</h2>
+            <p style={{ 
+              color: 'var(--neutral-600)', 
+              margin: '5px 0 0 0',
+              fontSize: '0.9rem'
+            }}>
+              Verifica tu nivel para obtener recomendaciones
+            </p>
           </div>
-
-          <div className="feature-card" onClick={() => navigate('/education')}>
-            <span className="feature-icon">📚</span>
-            <h3>Educación</h3>
-            <p>Aprende sobre diabetes y nutrición</p>
+          <button 
+            className={`modern-btn ${showGlucoseChecker ? 'modern-btn-outline' : 'modern-btn-primary'}`}
+            onClick={() => setShowGlucoseChecker(!showGlucoseChecker)}
+            style={{ padding: '8px 12px' }}
+          >
+            {showGlucoseChecker ? 'Ocultar' : 'Verificar'}
+          </button>
+        </div>
+        
+        {showGlucoseChecker && (
+          <div style={{ marginTop: '15px' }} className="fade-in">
+            <GlucoseChecker />
           </div>
+        )}
+      </div>
 
-          <div className="feature-card" onClick={() => navigate('/glucose')}>
-            <span className="feature-icon">📊</span>
-            <h3>Glucosa</h3>
-            <p>Monitorea tus niveles de glucosa</p>
+      {/* Características principales */}
+      <div className="modern-card slide-in">
+        <h2 className="modern-card-title" style={{ fontSize: '1.25rem', marginBottom: '15px' }}>
+          Funciones Principales
+        </h2>
+        
+        <div className="modern-features-grid">
+          {features.map((feature, index) => (
+            <div 
+              key={index} 
+              className="modern-feature-card fade-in"
+              style={{ animationDelay: `${index * 0.1}s`, cursor: 'pointer' }}
+              onClick={feature.onAction}
+            >
+              <div className="modern-feature-icon">
+                {feature.icon}
+              </div>
+              <h3 className="modern-feature-title">{feature.title}</h3>
+              <p className="modern-feature-description">{feature.description}</p>
+              <button 
+                className="modern-btn modern-btn-outline modern-btn-sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  feature.onAction();
+                }}
+                style={{ padding: '6px 10px', fontSize: '0.8rem' }}
+              >
+                {feature.actionText}
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Sección de consejos */}
+      <div className="modern-card fade-in">
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+          <div style={{ 
+            width: '40px', 
+            height: '40px', 
+            borderRadius: 'var(--radius-full)', 
+            backgroundColor: 'var(--primary-100)', 
+            color: 'var(--primary-700)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '1.25rem',
+            flexShrink: 0
+          }}>
+            💡
           </div>
-
-          <div className="feature-card" onClick={() => navigate('/profile')}>
-            <span className="feature-icon">👤</span>
-            <h3>Perfil</h3>
-            <p>Configura tus preferencias</p>
+          <div style={{ flex: 1 }}>
+            <h2 className="modern-card-title" style={{ fontSize: '1.1rem', marginBottom: '8px' }}>
+              Consejo del Día
+            </h2>
+            <p style={{ 
+              color: 'var(--neutral-700)', 
+              margin: 0,
+              fontSize: '0.9rem',
+              lineHeight: 1.4
+            }}>
+              Registra tus niveles antes y después de las comidas para identificar patrones.
+            </p>
           </div>
         </div>
-      </main>
-
-      <style>{`
-        .home-screen {
-          padding: 20px;
-          max-width: 1200px;
-          margin: 0 auto;
-        }
-
-        .home-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 30px;
-          padding-bottom: 20px;
-          border-bottom: 1px solid #eee;
-        }
-
-        .home-header h1 {
-          margin: 0;
-          color: #333;
-          font-size: 24px;
-        }
-
-        .logout-btn {
-          padding: 10px 20px;
-          background: #ff6b6b;
-          color: white;
-          border: none;
-          border-radius: 6px;
-          cursor: pointer;
-          font-weight: 600;
-          transition: background-color 0.2s ease;
-        }
-
-        .logout-btn:hover {
-          background: #ff5252;
-        }
-
-        .welcome-section {
-          text-align: center;
-          margin-bottom: 30px;
-        }
-
-        .welcome-section h2 {
-          margin: 0 0 10px 0;
-          color: #333;
-          font-size: 28px;
-        }
-
-        .welcome-section p {
-          margin: 0;
-          color: #666;
-          font-size: 18px;
-        }
-
-        .btn-glucose-toggle {
-          width: 100%;
-          padding: 15px;
-          background: #764ba2;
-          color: white;
-          border: none;
-          border-radius: 8px;
-          font-size: 16px;
-          font-weight: 600;
-          cursor: pointer;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 20px;
-          transition: background-color 0.2s ease;
-        }
-
-        .btn-glucose-toggle:hover {
-          background: #6a4190;
-        }
-
-        .toggle-icon {
-          font-size: 18px;
-        }
-
-        .features-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-          gap: 20px;
-          margin-top: 20px;
-        }
-
-        .feature-card {
-          background: white;
-          border-radius: 12px;
-          padding: 24px;
-          text-align: center;
-          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-          cursor: pointer;
-          transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        .feature-card:hover {
-          transform: translateY(-5px);
-          box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .feature-icon {
-          font-size: 48px;
-          margin-bottom: 16px;
-          display: block;
-        }
-
-        .feature-card h3 {
-          margin: 0 0 12px 0;
-          color: #333;
-          font-size: 20px;
-        }
-
-        .feature-card p {
-          margin: 0;
-          color: #666;
-          font-size: 14px;
-          line-height: 1.5;
-        }
-
-        @media (max-width: 768px) {
-          .home-screen {
-            padding: 16px;
-          }
-
-          .home-header {
-            flex-direction: column;
-            gap: 16px;
-            text-align: center;
-          }
-
-          .features-grid {
-            grid-template-columns: 1fr;
-          }
-        }
-      `}</style>
+      </div>
     </div>
   );
 };

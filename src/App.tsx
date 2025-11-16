@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { LoginScreen } from './screens/auth/LoginScreen';
@@ -18,7 +18,12 @@ const App: React.FC = () => {
   return (
     <AuthProvider>
       <Router>
-        <div>
+        <div style={{ 
+          height: '100vh', 
+          display: 'flex', 
+          flexDirection: 'column',
+          overflow: 'hidden'
+        }}>
           <Routes>
             {/* Rutas públicas - sin barra de navegación */}
             <Route path="/login" element={<LoginScreen />} />
@@ -26,51 +31,156 @@ const App: React.FC = () => {
             
             {/* Rutas protegidas - con barra de navegación */}
             <Route path="/home" element={
-              <div>
-                <ModernNavbar />
-                <ProtectedRoute><HomeScreen /></ProtectedRoute>
-              </div>
+              <ProtectedRoute>
+                <div style={{ 
+                  display: 'flex', 
+                  flexDirection: 'column', 
+                  height: '100%',
+                  overflow: 'hidden'
+                }}>
+                  <ModernNavbar />
+                  <div style={{ 
+                    flex: 1, 
+                    overflowY: 'auto', 
+                    WebkitOverflowScrolling: 'touch',
+                    scrollbarWidth: 'thin',
+                    scrollbarColor: 'var(--primary-500) var(--neutral-200)'
+                  }}>
+                    <HomeScreen />
+                  </div>
+                </div>
+              </ProtectedRoute>
             } />
             <Route path="/profile" element={
-              <div>
-                <ModernNavbar />
-                <ProtectedRoute><ProfileScreen /></ProtectedRoute>
-              </div>
+              <ProtectedRoute>
+                <div style={{ 
+                  display: 'flex', 
+                  flexDirection: 'column', 
+                  height: '100%',
+                  overflow: 'hidden'
+                }}>
+                  <ModernNavbar />
+                  <div style={{ 
+                    flex: 1, 
+                    overflowY: 'auto', 
+                    WebkitOverflowScrolling: 'touch',
+                    scrollbarWidth: 'thin',
+                    scrollbarColor: 'var(--primary-500) var(--neutral-200)'
+                  }}>
+                    <ProfileScreen />
+                  </div>
+                </div>
+              </ProtectedRoute>
             } />
             <Route path="/settings" element={
-              <div>
-                <ModernNavbar />
-                <ProtectedRoute><SettingsScreen /></ProtectedRoute>
-              </div>
+              <ProtectedRoute>
+                <div style={{ 
+                  display: 'flex', 
+                  flexDirection: 'column', 
+                  height: '100%',
+                  overflow: 'hidden'
+                }}>
+                  <ModernNavbar />
+                  <div style={{ 
+                    flex: 1, 
+                    overflowY: 'auto', 
+                    WebkitOverflowScrolling: 'touch',
+                    scrollbarWidth: 'thin',
+                    scrollbarColor: 'var(--primary-500) var(--neutral-200)'
+                  }}>
+                    <SettingsScreen />
+                  </div>
+                </div>
+              </ProtectedRoute>
             } />
             <Route path="/glucose" element={
-              <div>
-                <ModernNavbar />
-                <ProtectedRoute><GlucoseScreen /></ProtectedRoute>
-              </div>
+              <ProtectedRoute>
+                <div style={{ 
+                  display: 'flex', 
+                  flexDirection: 'column', 
+                  height: '100%',
+                  overflow: 'hidden'
+                }}>
+                  <ModernNavbar />
+                  <div style={{ 
+                    flex: 1, 
+                    overflowY: 'auto', 
+                    WebkitOverflowScrolling: 'touch',
+                    scrollbarWidth: 'thin',
+                    scrollbarColor: 'var(--primary-500) var(--neutral-200)'
+                  }}>
+                    <GlucoseScreen />
+                  </div>
+                </div>
+              </ProtectedRoute>
             } />
             <Route path="/foods" element={
-              <div>
-                <ModernNavbar />
-                <ProtectedRoute><FoodSearchScreen /></ProtectedRoute>
-              </div>
+              <ProtectedRoute>
+                <div style={{ 
+                  display: 'flex', 
+                  flexDirection: 'column', 
+                  height: '100%',
+                  overflow: 'hidden'
+                }}>
+                  <ModernNavbar />
+                  <div style={{ 
+                    flex: 1, 
+                    overflowY: 'auto', 
+                    WebkitOverflowScrolling: 'touch',
+                    scrollbarWidth: 'thin',
+                    scrollbarColor: 'var(--primary-500) var(--neutral-200)'
+                  }}>
+                    <FoodSearchScreen />
+                  </div>
+                </div>
+              </ProtectedRoute>
             } />
             <Route path="/foods/tracking" element={
-              <div>
-                <ModernNavbar />
-                <ProtectedRoute><FoodTrackingScreen /></ProtectedRoute>
-              </div>
+              <ProtectedRoute>
+                <div style={{ 
+                  display: 'flex', 
+                  flexDirection: 'column', 
+                  height: '100%',
+                  overflow: 'hidden'
+                }}>
+                  <ModernNavbar />
+                  <div style={{ 
+                    flex: 1, 
+                    overflowY: 'auto', 
+                    WebkitOverflowScrolling: 'touch',
+                    scrollbarWidth: 'thin',
+                    scrollbarColor: 'var(--primary-500) var(--neutral-200)'
+                  }}>
+                    <FoodTrackingScreen />
+                  </div>
+                </div>
+              </ProtectedRoute>
             } />
             <Route path="/education" element={
-              <div>
-                <ModernNavbar />
-                <ProtectedRoute><EducationScreen /></ProtectedRoute>
-              </div>
+              <ProtectedRoute>
+                <div style={{ 
+                  display: 'flex', 
+                  flexDirection: 'column', 
+                  height: '100%',
+                  overflow: 'hidden'
+                }}>
+                  <ModernNavbar />
+                  <div style={{ 
+                    flex: 1, 
+                    overflowY: 'auto', 
+                    WebkitOverflowScrolling: 'touch',
+                    scrollbarWidth: 'thin',
+                    scrollbarColor: 'var(--primary-500) var(--neutral-200)'
+                  }}>
+                    <EducationScreen />
+                  </div>
+                </div>
+              </ProtectedRoute>
             } />
             
             {/* Ruta por defecto - redirige al login */}
-            <Route path="/" element={<LoginScreen />} />
-            <Route path="*" element={<LoginScreen />} />
+            <Route path="/" element={<Navigate to="/login" replace />} />
+            <Route path="*" element={<Navigate to="/login" replace />} />
           </Routes>
         </div>
       </Router>
