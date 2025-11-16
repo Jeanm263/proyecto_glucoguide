@@ -11,7 +11,11 @@ export const LoginScreen: React.FC = () => {
 
   // Redirect to home if already authenticated
   useEffect(() => {
-    if (isAuthenticated) {
+    // Detectar si estamos en un entorno móvil (Capacitor)
+    const isMobile = typeof (window as unknown as { Capacitor?: unknown }).Capacitor !== 'undefined';
+    
+    // No redirigir automáticamente en entornos móviles
+    if (isAuthenticated && !isMobile) {
       navigate('/home');
     }
   }, [isAuthenticated, navigate]);
@@ -26,6 +30,11 @@ export const LoginScreen: React.FC = () => {
       setError('Credenciales inválidas. Por favor, inténtalo de nuevo.');
     }
   };
+
+  // If user is already authenticated, don't render the login form
+  if (isAuthenticated) {
+    return null;
+  }
 
   return (
     <div className="container" style={{ 

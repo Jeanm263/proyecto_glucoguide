@@ -34,7 +34,11 @@ const ModernNavbar: React.FC = () => {
           <button
             onClick={handleLogout}
             className="modern-btn modern-btn-ghost modern-btn-sm"
-            style={{ padding: '4px 8px' }}
+            style={{ 
+              padding: '4px 8px',
+              color: 'white',
+              border: '1px solid rgba(255,255,255,0.3)'
+            }}
           >
             Salir
           </button>

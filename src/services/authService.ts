@@ -139,6 +139,15 @@ export const authService = {
    * Verificar si hay un token válido
    */
   async isAuthenticated(): Promise<boolean> {
+    // Detectar si estamos en un entorno móvil (Capacitor)
+    const isMobile = typeof (window as unknown as { Capacitor?: unknown }).Capacitor !== 'undefined';
+    
+    // No verificar autenticación automáticamente en entornos móviles
+    if (isMobile) {
+      logger.debug('Entorno móvil detectado, no verificando autenticación automáticamente');
+      return false;
+    }
+    
     if (USE_MOCK_SERVICE) {
       // Para desarrollo, asumimos que no estamos autenticados
       return false;
