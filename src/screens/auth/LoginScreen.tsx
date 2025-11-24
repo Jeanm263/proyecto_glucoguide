@@ -6,16 +6,15 @@ export const LoginScreen: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const { login, isAuthenticated } = useAuth();
+  const { login, isAuthenticated, isLoading } = useAuth();
   const navigate = useNavigate();
 
   // Redirect to home if already authenticated
   useEffect(() => {
-    // Detectar si estamos en un entorno móvil (Capacitor)
-    const isMobile = typeof (window as unknown as { Capacitor?: unknown }).Capacitor !== 'undefined';
-    
-    // No redirigir automáticamente en entornos móviles
-    if (isAuthenticated && !isMobile) {
+    // En entornos móviles, también queremos redirigir si el usuario está autenticado
+    // La condición anterior evitaba la redirección innecesaria en móvil, pero ahora
+    // manejamos mejor el ciclo de vida de la app
+    if (isAuthenticated) {
       navigate('/home');
     }
   }, [isAuthenticated, navigate]);
@@ -31,8 +30,58 @@ export const LoginScreen: React.FC = () => {
     }
   };
 
-  // If user is already authenticated, don't render the login form
+  // Show loading indicator while checking auth state
+  if (isLoading) {
+    return (
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh',
+        backgroundColor: '#f8f9fa'
+      }}>
+        <div style={{
+          textAlign: 'center',
+          padding: '30px',
+          backgroundColor: 'white',
+          borderRadius: '12px',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+          maxWidth: '350px',
+          width: '90%'
+        }}>
+          <div className="spinner" style={{
+            width: '48px',
+            height: '48px',
+            border: '4px solid #f3f3f3',
+            borderTop: '4px solid #9c27b0',
+            borderRadius: '50%',
+            animation: 'spin 1s linear infinite',
+            margin: '0 auto 15px'
+          }}></div>
+          <h3 style={{ 
+            color: '#333', 
+            marginBottom: '10px',
+            fontSize: '1.2rem',
+            fontWeight: 600
+          }}>
+            Verificando autenticación
+          </h3>
+          <p style={{ 
+            color: '#666', 
+            margin: 0,
+            fontSize: '0.95rem'
+          }}>
+            Cargando...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // If user is already authenticated, redirect to home (this should be handled by useEffect)
+  // But we keep this as a safeguard
   if (isAuthenticated) {
+    navigate('/home');
     return null;
   }
 
@@ -40,147 +89,151 @@ export const LoginScreen: React.FC = () => {
     <div className="container" style={{ 
       display: 'flex', 
       alignItems: 'center', 
-      justifyContent: 'center', 
+      justifyContent: 'center',
       minHeight: '100vh',
+      backgroundColor: '#f8f9fa',
       padding: '20px'
     }}>
-      <div className="modern-card" style={{ 
-        maxWidth: '400px', 
+      <div style={{
         width: '100%',
-        margin: '20px 0'
+        maxWidth: '400px',
+        padding: '40px',
+        backgroundColor: 'white',
+        borderRadius: '12px',
+        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)'
       }}>
         <div style={{ textAlign: 'center', marginBottom: '30px' }}>
-          <div style={{ 
-            width: '60px', 
-            height: '60px', 
-            borderRadius: 'var(--radius-full)', 
-            backgroundColor: 'var(--primary-100)', 
-            color: 'var(--primary-700)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '1.5rem',
-            fontWeight: 'bold',
-            margin: '0 auto 15px'
-          }}>
-            G
-          </div>
           <h1 style={{ 
-            fontFamily: 'var(--font-family-heading)', 
-            fontSize: '2rem', 
-            fontWeight: 700, 
-            color: 'var(--neutral-900)',
-            margin: '0 0 5px 0'
+            color: '#333', 
+            marginBottom: '10px',
+            fontSize: '1.8rem',
+            fontWeight: 700
           }}>
-            GlucosaGuide
+            Bienvenido
           </h1>
           <p style={{ 
-            color: 'var(--neutral-600)', 
-            margin: 0 
+            color: '#666', 
+            margin: 0,
+            fontSize: '1rem'
           }}>
-            Gestiona tu diabetes de forma inteligente
+            Inicia sesión para continuar
           </p>
         </div>
-        
-        <h2 className="modern-card-title" style={{ textAlign: 'center', marginBottom: '20px' }}>
-          Iniciar Sesión
-        </h2>
-        
+
         {error && (
-          <div className="modern-alert modern-alert-error">
+          <div style={{
+            backgroundColor: '#ffebee',
+            color: '#c62828',
+            padding: '12px',
+            borderRadius: '8px',
+            marginBottom: '20px',
+            fontSize: '0.9rem'
+          }}>
             {error}
           </div>
         )}
-        
+
         <form onSubmit={handleSubmit}>
-          <div className="modern-form-group">
-            <label className="modern-form-label">Correo Electrónico</label>
+          <div style={{ marginBottom: '20px' }}>
+            <label htmlFor="email" style={{
+              display: 'block',
+              marginBottom: '8px',
+              fontWeight: 500,
+              color: '#333'
+            }}>
+              Correo electrónico
+            </label>
             <input
+              id="email"
               type="email"
-              className="modern-form-input"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              style={{
+                width: '100%',
+                padding: '12px',
+                border: '1px solid #ddd',
+                borderRadius: '8px',
+                fontSize: '1rem',
+                boxSizing: 'border-box'
+              }}
+              placeholder="tu@email.com"
             />
           </div>
-          
-          <div className="modern-form-group">
-            <label className="modern-form-label">Contraseña</label>
+
+          <div style={{ marginBottom: '25px' }}>
+            <label htmlFor="password" style={{
+              display: 'block',
+              marginBottom: '8px',
+              fontWeight: 500,
+              color: '#333'
+            }}>
+              Contraseña
+            </label>
             <input
+              id="password"
               type="password"
-              className="modern-form-input"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              style={{
+                width: '100%',
+                padding: '12px',
+                border: '1px solid #ddd',
+                borderRadius: '8px',
+                fontSize: '1rem',
+                boxSizing: 'border-box'
+              }}
+              placeholder="••••••••"
             />
           </div>
-          
-          <div style={{ 
-            display: 'flex', 
-            justifyContent: 'space-between', 
-            alignItems: 'center', 
-            marginBottom: '20px',
-            flexWrap: 'wrap',
-            gap: '10px'
-          }}>
-            <label style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              color: 'var(--neutral-600)',
-              fontSize: '0.9rem'
-            }}>
-              <input 
-                type="checkbox" 
-                style={{ 
-                  marginRight: '8px',
-                  borderRadius: 'var(--radius-sm)'
-                }} 
-              />
-              Recordarme
-            </label>
-            <Link 
-              to="/forgot-password" 
-              style={{ 
-                color: 'var(--primary-600)', 
-                textDecoration: 'none',
-                fontSize: '0.9rem',
-                fontWeight: 500
-              }}
-            >
-              ¿Olvidaste tu contraseña?
-            </Link>
-          </div>
-          
-          <button 
-            type="submit" 
-            className="modern-btn modern-btn-primary modern-btn-lg modern-btn-block"
+
+          <button
+            type="submit"
+            disabled={isLoading}
+            style={{
+              width: '100%',
+              padding: '14px',
+              backgroundColor: '#9c27b0',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              fontSize: '1rem',
+              fontWeight: 600,
+              cursor: isLoading ? 'not-allowed' : 'pointer',
+              opacity: isLoading ? 0.7 : 1,
+              boxShadow: '0 2px 6px rgba(156, 39, 176, 0.2)',
+              transition: 'all 0.2s ease'
+            }}
           >
-            Iniciar Sesión
+            {isLoading ? 'Iniciando sesión...' : 'Iniciar sesión'}
           </button>
         </form>
-        
+
         <div style={{ 
-          marginTop: '25px', 
           textAlign: 'center', 
-          paddingTop: '20px', 
-          borderTop: '1px solid var(--neutral-200)'
+          marginTop: '25px',
+          paddingTop: '20px',
+          borderTop: '1px solid #eee'
         }}>
           <p style={{ 
-            color: 'var(--neutral-600)',
-            margin: 0
+            color: '#666', 
+            margin: '0 0 15px 0',
+            fontSize: '0.95rem'
           }}>
-            ¿No tienes cuenta?{' '}
-            <Link 
-              to="/register" 
-              style={{ 
-                color: 'var(--primary-600)', 
-                fontWeight: 500,
-                textDecoration: 'none'
-              }}
-            >
-              Regístrate aquí
-            </Link>
+            ¿No tienes cuenta?
           </p>
+          <Link 
+            to="/register" 
+            style={{
+              color: '#9c27b0',
+              textDecoration: 'none',
+              fontWeight: 600,
+              fontSize: '1rem'
+            }}
+          >
+            Regístrate aquí
+          </Link>
         </div>
       </div>
     </div>

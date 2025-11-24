@@ -1,34 +1,32 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import { useTheme } from '../../hooks/useTheme';
 
 export const ThemeToggle: React.FC = () => {
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
-
-  useEffect(() => {
-    // Check for saved theme preference or respect OS preference
-    const savedTheme = localStorage.getItem('theme');
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    
-    if (savedTheme) {
-      setTheme(savedTheme as 'light' | 'dark');
-      document.documentElement.setAttribute('data-theme', savedTheme);
-    } else if (prefersDark) {
-      setTheme('dark');
-      document.documentElement.setAttribute('data-theme', 'dark');
-    }
-  }, []);
-
-  const toggleTheme = () => {
-    const newTheme = theme === 'light' ? 'dark' : 'light';
-    setTheme(newTheme);
-    document.documentElement.setAttribute('data-theme', newTheme);
-    localStorage.setItem('theme', newTheme);
-  };
+  const { theme, toggleTheme } = useTheme();
 
   return (
-    <button 
-      className="theme-toggle pulse"
+    <button
       onClick={toggleTheme}
-      aria-label={`Cambiar a tema ${theme === 'light' ? 'oscuro' : 'claro'}`}
+      style={{
+        position: 'fixed',
+        bottom: '80px',
+        right: '20px',
+        width: '50px',
+        height: '50px',
+        borderRadius: '50%',
+        background: 'var(--primary-500)',
+        color: 'white',
+        border: 'none',
+        boxShadow: 'var(--shadow-lg)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        cursor: 'pointer',
+        zIndex: 1000,
+        fontSize: '1.2rem',
+        transition: 'all 0.3s ease'
+      }}
+      aria-label={`Cambiar a modo ${theme === 'light' ? 'oscuro' : 'claro'}`}
     >
       {theme === 'light' ? '🌙' : '☀️'}
     </button>

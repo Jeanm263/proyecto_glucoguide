@@ -6,7 +6,7 @@ import { z } from 'zod';
  */
 const envSchema = z.object({
   // URL del API backend (opcional, tiene valor por defecto)
-  VITE_API_URL: z.string().url().optional().default('http://localhost:4000/api'),
+  VITE_API_URL: z.string().url().optional().default('https://glucosa-app-backend.onrender.com/api'),
   
   // Determina si usar el servicio mock o el backend real
   VITE_USE_MOCK_SERVICE: z

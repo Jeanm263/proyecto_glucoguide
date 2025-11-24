@@ -3,6 +3,7 @@ import { authService, type AuthResponse, type LoginCredentials, type RegisterDat
 import { USE_MOCK_SERVICE } from '../config/env';
 import { toastError, toastSuccess, getErrorMessage } from '../utils/toast';
 import logger from '../utils/logger';
+import { initAppLifecycleListeners, removeAppLifecycleListeners } from '../utils/appLifecycle';
 
 export interface AuthContextType {
   user: User | null;
@@ -28,54 +29,77 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Función para verificar la autenticación
+  const checkAuth = useCallback(async () => {
+    // Solo verificar autenticación si no estamos usando el servicio mock
+    // y no estamos en un entorno de pruebas
+    const isTestEnv = typeof process !== 'undefined' && process.env && process.env.NODE_ENV === 'test';
+    
+    if (!USE_MOCK_SERVICE && !isTestEnv) {
+      try {
+        logger.debug('Verificando estado de autenticación');
+        const isAuthenticated = await authService.isAuthenticated();
+        logger.debug('Resultado de verificación de autenticación:', isAuthenticated);
+        if (isAuthenticated) {
+          const currentUser = await authService.getCurrentUser();
+          logger.debug('Usuario actual obtenido:', { userId: currentUser.id, email: currentUser.email });
+          setUser({
+            id: currentUser.id,
+            name: currentUser.name,
+            email: currentUser.email,
+            age: currentUser.age,
+            diabetesType: currentUser.diabetesType,
+          });
+        } else {
+          logger.debug('Usuario no autenticado, estableciendo user a null');
+          setUser(null);
+        }
+      } catch (error) {
+        // Si no hay sesión activa, el error es esperado
+        logger.debug('No se encontró sesión activa:', error);
+        setUser(null);
+      } finally {
+        // Siempre establecer isLoading a false después de verificar la autenticación
+        logger.debug('Verificación de autenticación completada, estableciendo isLoading a false');
+        if (isLoading) {
+          setIsLoading(false);
+        }
+      }
+    } else {
+      // En entorno de pruebas o cuando se usa el servicio mock, establecer isLoading a false inmediatamente
+      logger.debug('Usando servicio mock o entorno de pruebas, estableciendo isLoading a false');
+      setIsLoading(false);
+      // Also set user to null in mock mode to ensure proper navigation
+      setUser(null);
+    }
+  }, [isLoading]);
+
   /**
    * Verificar autenticación al montar el componente
    */
   useEffect(() => {
-    const checkAuth = async () => {
-      // Solo verificar autenticación si no estamos usando el servicio mock
-      // y no estamos en un entorno de pruebas
-      const isTestEnv = typeof process !== 'undefined' && process.env && process.env.NODE_ENV === 'test';
-      
-      if (!USE_MOCK_SERVICE && !isTestEnv) {
-        try {
-          logger.debug('Verificando estado de autenticación al iniciar la aplicación');
-          const isAuthenticated = await authService.isAuthenticated();
-          logger.debug('Resultado de verificación de autenticación:', isAuthenticated);
-          if (isAuthenticated) {
-            const currentUser = await authService.getCurrentUser();
-            logger.debug('Usuario actual obtenido:', { userId: currentUser.id, email: currentUser.email });
-            setUser({
-              id: currentUser.id,
-              name: currentUser.name,
-              email: currentUser.email,
-              age: currentUser.age,
-              diabetesType: currentUser.diabetesType,
-            });
-          } else {
-            logger.debug('Usuario no autenticado, estableciendo user a null');
-            setUser(null);
-          }
-        } catch (error) {
-          // Si no hay sesión activa, el error es esperado
-          logger.debug('No se encontró sesión activa:', error);
-          setUser(null);
-        } finally {
-          // Siempre establecer isLoading a false después de verificar la autenticación
-          logger.debug('Verificación de autenticación completada, estableciendo isLoading a false');
-          setIsLoading(false);
-        }
-      } else {
-        // En entorno de pruebas o cuando se usa el servicio mock, establecer isLoading a false inmediatamente
-        logger.debug('Usando servicio mock o entorno de pruebas, estableciendo isLoading a false');
-        setIsLoading(false);
-        // Also set user to null in mock mode to ensure proper navigation
-        setUser(null);
+    checkAuth();
+
+    // Inicializar listeners del ciclo de vida de la app
+    initAppLifecycleListeners(checkAuth);
+    
+    // Agregar event listeners para manejar el ciclo de vida del documento web
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        // Cuando la app vuelve a estar visible, verificar la autenticación
+        checkAuth();
       }
     };
-
-    checkAuth();
-  }, []);
+    
+    // Para navegadores modernos
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    // Cleanup
+    return () => {
+      removeAppLifecycleListeners();
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [checkAuth]);
 
   /**
    * Iniciar sesión
@@ -118,16 +142,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const response: AuthResponse = await authService.register(data);
       toastSuccess('¡Cuenta creada exitosamente!');
       
-      // Auto-login after registration as per project requirements
-      setUser({
-        id: response.user.id,
-        name: response.user.name,
-        email: response.user.email,
-        age: response.user.age,
-        diabetesType: response.user.diabetesType,
-      });
+      // No auto-login after registration - user must login explicitly
+      // Just clear the user state to ensure proper navigation
+      setUser(null);
       
-      logger.info('Registro y login automático completados exitosamente', { userId: response.user.id, email: response.user.email });
+      logger.info('Registro completado exitosamente', { userId: response.user.id, email: response.user.email });
     } catch (error) {
       const errorMessage = getErrorMessage(error);
       logger.error('Error en registro', { 

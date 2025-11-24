@@ -90,11 +90,11 @@ export const BottomNavigation: React.FC = () => {
           left: 0;
           right: 0;
           background: rgba(255, 255, 255, 0.95);
-          backdrop-filter: blur(20px);
-          border-top: 1px solid rgba(0, 0, 0, 0.1);
+          backdrop-filter: blur(10px);
+          border-top: 1px solid rgba(156, 39, 176, 0.1);
           padding: 12px 0;
           z-index: 1000;
-          box-shadow: 0 -2px 20px rgba(0, 0, 0, 0.1);
+          box-shadow: 0 -2px 10px rgba(156, 39, 176, 0.1);
         }
 
         .nav-list {
@@ -126,19 +126,19 @@ export const BottomNavigation: React.FC = () => {
           border-radius: 16px;
           cursor: pointer;
           transition: all 0.3s ease;
-          color: #999;
+          color: #9e9e9e;
           font-size: 11px;
           font-weight: 500;
           width: 100%;
         }
 
         .nav-button:hover {
-          background: rgba(102, 126, 234, 0.1);
-          color: #667eea;
+          background: rgba(156, 39, 176, 0.1);
+          color: #9c27b0;
         }
 
         .nav-button.active {
-          color: #667eea;
+          color: #9c27b0;
           font-weight: 600;
           transform: translateY(-2px);
         }

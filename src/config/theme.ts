@@ -25,6 +25,36 @@ export const futuristicTheme = {
     divider: '#3a3a5a'
   },
   
+  // Colores para modo oscuro
+  dark: {
+    background: '#0a0a1a',
+    surface: '#121224',
+    surfaceLight: '#1a1a30',
+    text: {
+      primary: '#ffffff',
+      secondary: '#e0e0ff',
+      tertiary: '#a0a0c0',
+      disabled: '#606080'
+    },
+    border: '#2a2a4a',
+    divider: '#3a3a5a'
+  },
+  
+  // Colores para modo claro
+  light: {
+    background: '#f8f9fa',
+    surface: '#ffffff',
+    surfaceLight: '#f8f9fa',
+    text: {
+      primary: '#212121',
+      secondary: '#616161',
+      tertiary: '#9e9e9e',
+      disabled: '#bdbdbd'
+    },
+    border: '#e0e0e0',
+    divider: '#f5f5f5'
+  },
+  
   // Tipografía
   typography: {
     fontFamily: {

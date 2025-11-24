@@ -8,6 +8,7 @@ export const RegisterScreen: React.FC = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
+  const [registrationSuccess, setRegistrationSuccess] = useState(false);
   const { register, isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
@@ -29,8 +30,17 @@ export const RegisterScreen: React.FC = () => {
     
     try {
       await register({ name, email, password });
-      // After successful registration with auto-login, redirect to home screen
-      navigate('/home');
+      // After successful registration, show success message and redirect to login
+      setRegistrationSuccess(true);
+      // Clear the form
+      setName('');
+      setEmail('');
+      setPassword('');
+      setConfirmPassword('');
+      // Redirect to login after 3 seconds
+      setTimeout(() => {
+        navigate('/login');
+      }, 3000);
     } catch (error) {
       console.error('Error en registro:', error);
       setError('Error al crear la cuenta. Por favor, inténtalo de nuevo.');
@@ -42,13 +52,76 @@ export const RegisterScreen: React.FC = () => {
     return null;
   }
 
+  // If registration was successful, show success message
+  if (registrationSuccess) {
+    return (
+      <div className="container" style={{ 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center', 
+        minHeight: '100vh',
+        padding: '20px',
+        backgroundColor: '#f8f9fa'
+      }}>
+        <div className="modern-card" style={{ 
+          maxWidth: '400px', 
+          width: '100%',
+          margin: '20px 0',
+          textAlign: 'center'
+        }}>
+          <div style={{ 
+            width: '60px', 
+            height: '60px', 
+            borderRadius: '50%', 
+            backgroundColor: '#4caf50', 
+            color: 'white',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '1.5rem',
+            fontWeight: 'bold',
+            margin: '0 auto 20px'
+          }}>
+            ✓
+          </div>
+          <h2 style={{ 
+            fontFamily: 'var(--font-family-heading)', 
+            fontSize: '1.5rem', 
+            fontWeight: 700, 
+            color: 'var(--neutral-900)',
+            margin: '0 0 15px 0'
+          }}>
+            ¡Registro Exitoso!
+          </h2>
+          <p style={{ 
+            color: 'var(--neutral-600)', 
+            margin: 0,
+            fontSize: '1rem',
+            lineHeight: 1.5
+          }}>
+            Tu cuenta ha sido creada correctamente. Ahora necesitas iniciar sesión con tus credenciales.
+          </p>
+          <p style={{ 
+            color: 'var(--primary-600)', 
+            margin: '20px 0 0 0',
+            fontSize: '0.9rem',
+            fontWeight: 500
+          }}>
+            Redirigiendo a la página de inicio de sesión...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="container" style={{ 
       display: 'flex', 
       alignItems: 'center', 
       justifyContent: 'center', 
       minHeight: '100vh',
-      padding: '20px'
+      padding: '20px',
+      backgroundColor: '#f8f9fa'
     }}>
       <div className="modern-card" style={{ 
         maxWidth: '400px', 

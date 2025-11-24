@@ -74,6 +74,47 @@
   --transition-slow: 500ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* Dark mode variables */
+:root[data-theme="dark"] {
+  --neutral-50: #1a1a2e;
+  --neutral-100: #16213e;
+  --neutral-200: #0f3460;
+  --neutral-300: #1a1a2e;
+  --neutral-400: #16213e;
+  --neutral-500: #0f3460;
+  --neutral-600: #e6e6e6;
+  --neutral-700: #f0f0f0;
+  --neutral-800: #fafafa;
+  --neutral-900: #ffffff;
+  
+  --primary-50: #2d0d44;
+  --primary-100: #4a148c;
+  --primary-200: #6a1b9a;
+  --primary-300: #7b1fa2;
+  --primary-400: #8e24aa;
+  --primary-500: #9c27b0;
+  --primary-600: #ab47bc;
+  --primary-700: #ba68c8;
+  --primary-800: #ce93d8;
+  --primary-900: #e1bee7;
+  
+  --secondary-50: #001f1a;
+  --secondary-100: #004d40;
+  --secondary-200: #00695c;
+  --secondary-300: #00796b;
+  --secondary-400: #00897b;
+  --secondary-500: #009688;
+  --secondary-600: #26a69a;
+  --secondary-700: #4db6ac;
+  --secondary-800: #80cbc4;
+  --secondary-900: #b2dfdb;
+  
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.4);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.6), 0 10px 10px -5px rgba(0, 0, 0, 0.5);
+}
+
 /* Base Styles */
 * {
   margin: 0;
@@ -88,6 +129,12 @@ body {
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Dark mode body styles */
+:root[data-theme="dark"] body {
+  background-color: var(--neutral-100);
+  color: var(--neutral-700);
 }
 
 /* Container */
@@ -114,6 +161,13 @@ body {
   transform: translateY(-2px);
 }
 
+/* Dark mode card styles */
+:root[data-theme="dark"] .modern-card {
+  background: var(--neutral-200);
+  border: 1px solid var(--neutral-300);
+  color: var(--neutral-700);
+}
+
 .modern-card-header {
   margin-bottom: var(--spacing-md);
 }
@@ -126,10 +180,20 @@ body {
   margin: 0;
 }
 
+/* Dark mode card title styles */
+:root[data-theme="dark"] .modern-card-title {
+  color: var(--neutral-700);
+}
+
 .modern-card-subtitle {
   font-size: 1rem;
   color: var(--neutral-600);
   margin-top: var(--spacing-xs);
+}
+
+/* Dark mode card subtitle styles */
+:root[data-theme="dark"] .modern-card-subtitle {
+  color: var(--neutral-600);
 }
 
 /* Buttons */
@@ -206,6 +270,32 @@ body {
   background-color: var(--neutral-100);
 }
 
+/* Dark mode button styles */
+:root[data-theme="dark"] .modern-btn-primary {
+  background-color: var(--primary-500);
+}
+
+:root[data-theme="dark"] .modern-btn-secondary {
+  background-color: var(--secondary-500);
+}
+
+:root[data-theme="dark"] .modern-btn-outline {
+  border-color: var(--primary-400);
+  color: var(--primary-400);
+}
+
+:root[data-theme="dark"] .modern-btn-ghost {
+  color: var(--neutral-600);
+}
+
+:root[data-theme="dark"] .modern-btn-outline:hover:not(:disabled) {
+  background-color: var(--neutral-300);
+}
+
+:root[data-theme="dark"] .modern-btn-ghost:hover:not(:disabled) {
+  background-color: var(--neutral-300);
+}
+
 /* Button Sizes */
 .modern-btn-sm {
   padding: var(--spacing-xs) var(--spacing-sm);
@@ -258,6 +348,17 @@ body {
   box-shadow: 0 0 0 3px rgba(244, 67, 54, 0.1);
 }
 
+/* Dark mode form styles */
+:root[data-theme="dark"] .modern-form-input {
+  background-color: var(--neutral-200);
+  border-color: var(--neutral-400);
+  color: var(--neutral-700);
+}
+
+:root[data-theme="dark"] .modern-form-label {
+  color: var(--neutral-600);
+}
+
 /* Alerts */
 .modern-alert {
   padding: var(--spacing-md);
@@ -300,6 +401,12 @@ body {
   box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
   z-index: 1000;
   padding: var(--spacing-sm) 0;
+}
+
+/* Dark mode mobile nav styles */
+:root[data-theme="dark"] .modern-mobile-nav {
+  background-color: var(--neutral-200);
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.3);
 }
 
 .modern-mobile-nav-container {
@@ -362,12 +469,23 @@ body {
   box-shadow: var(--shadow-lg);
 }
 
+/* Dark mode stat card styles */
+:root[data-theme="dark"] .modern-stat-card {
+  background: linear-gradient(135deg, var(--neutral-200), var(--neutral-300));
+  border: 1px solid var(--neutral-400);
+}
+
 .modern-stat-value {
   font-family: var(--font-family-heading);
   font-size: 1.5rem;
   font-weight: 700;
   color: var(--primary-700);
   margin: 0 0 var(--spacing-xs);
+}
+
+/* Dark mode stat value styles */
+:root[data-theme="dark"] .modern-stat-value {
+  color: var(--primary-400);
 }
 
 .modern-stat-title {
@@ -415,6 +533,12 @@ body {
   box-shadow: var(--shadow-lg);
 }
 
+/* Dark mode feature card styles */
+:root[data-theme="dark"] .modern-feature-card {
+  background: var(--neutral-200);
+  border: 1px solid var(--neutral-400);
+}
+
 .modern-feature-icon {
   width: 48px;
   height: 48px;
@@ -428,6 +552,12 @@ body {
   color: var(--primary-700);
 }
 
+/* Dark mode feature icon styles */
+:root[data-theme="dark"] .modern-feature-icon {
+  background-color: var(--primary-900);
+  color: var(--primary-300);
+}
+
 .modern-feature-title {
   font-family: var(--font-family-heading);
   font-size: 0.875rem;
@@ -436,11 +566,21 @@ body {
   margin: 0 0 var(--spacing-xs);
 }
 
+/* Dark mode feature title styles */
+:root[data-theme="dark"] .modern-feature-title {
+  color: var(--neutral-700);
+}
+
 .modern-feature-description {
   color: var(--neutral-600);
   margin: 0 0 var(--spacing-sm);
   font-size: 0.8rem;
   line-height: 1.4;
+}
+
+/* Dark mode feature description styles */
+:root[data-theme="dark"] .modern-feature-description {
+  color: var(--neutral-600);
 }
 
 /* Header for Mobile */
@@ -456,12 +596,23 @@ body {
   align-items: center;
 }
 
+/* Dark mode mobile header styles */
+:root[data-theme="dark"] .modern-mobile-header {
+  background-color: var(--neutral-200);
+  box-shadow: var(--shadow-sm);
+}
+
 .modern-header-title {
   font-family: var(--font-family-heading);
   font-size: 1.25rem;
   font-weight: 700;
   color: var(--primary-700);
   margin: 0;
+}
+
+/* Dark mode header title styles */
+:root[data-theme="dark"] .modern-header-title {
+  color: var(--primary-400);
 }
 
 /* Responsive Design */
@@ -658,6 +809,11 @@ body {
   z-index: 9999;
 }
 
+/* Dark mode loading overlay styles */
+:root[data-theme="dark"] .loading-overlay {
+  background: rgba(26, 26, 46, 0.8);
+}
+
 .loading-spinner {
   width: 50px;
   height: 50px;
@@ -665,6 +821,11 @@ body {
   border-top: 4px solid var(--primary-500);
   border-radius: 50%;
   animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 /* Enhanced toast notifications */
@@ -690,6 +851,12 @@ body {
   max-width: 400px;
 }
 
+/* Dark mode toast styles */
+:root[data-theme="dark"] .toast {
+  background: var(--neutral-200);
+  color: var(--neutral-700);
+}
+
 .toast-success {
   border-left-color: var(--accent-success);
 }
@@ -704,45 +871,6 @@ body {
 
 .toast-info {
   border-left-color: var(--accent-info);
-}
-
-/* Dark mode support */
-:root[data-theme="dark"] {
-  --neutral-50: #1a1a1a;
-  --neutral-100: #2d2d2d;
-  --neutral-200: #404040;
-  --neutral-300: #525252;
-  --neutral-400: #737373;
-  --neutral-500: #a3a3a3;
-  --neutral-600: #d4d4d4;
-  --neutral-700: #e5e5e5;
-  --neutral-800: #f5f5f5;
-  --neutral-900: #ffffff;
-}
-
-[data-theme="dark"] body {
-  background-color: var(--neutral-50);
-  color: var(--neutral-800);
-}
-
-[data-theme="dark"] .modern-card {
-  background: var(--neutral-100);
-  border: 1px solid var(--neutral-200);
-}
-
-[data-theme="dark"] .modern-form-input {
-  background-color: var(--neutral-100);
-  border-color: var(--neutral-300);
-  color: var(--neutral-800);
-}
-
-[data-theme="dark"] .modern-btn-primary {
-  background-color: var(--primary-500);
-}
-
-[data-theme="dark"] .modern-btn-outline {
-  border-color: var(--primary-400);
-  color: var(--primary-400);
 }
 
 /* Theme toggle button */
@@ -911,6 +1039,36 @@ body {
   transform: translateY(-1px);
 }
 
+/* Dark mode enhanced button styles */
+:root[data-theme="dark"] .modern-btn-primary {
+  background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-600) 100%);
+}
+
+:root[data-theme="dark"] .modern-btn-secondary {
+  background: linear-gradient(135deg, var(--secondary-500) 0%, var(--secondary-600) 100%);
+}
+
+:root[data-theme="dark"] .modern-btn-success {
+  background: linear-gradient(135deg, var(--accent-success) 0%, #2e7d32 100%);
+}
+
+:root[data-theme="dark"] .modern-btn-outline {
+  border-color: var(--primary-400);
+  color: var(--primary-400);
+}
+
+:root[data-theme="dark"] .modern-btn-ghost {
+  color: var(--neutral-600);
+}
+
+:root[data-theme="dark"] .modern-btn-outline:hover:not(:disabled) {
+  background-color: var(--neutral-300);
+}
+
+:root[data-theme="dark"] .modern-btn-ghost:hover:not(:disabled) {
+  background-color: var(--neutral-300);
+}
+
 /* Button Sizes */
 .modern-btn-sm {
   padding: var(--spacing-xs) var(--spacing-sm);
@@ -961,6 +1119,16 @@ body {
   border-bottom: 1px solid var(--neutral-200);
 }
 
+/* Dark mode enhanced card styles */
+:root[data-theme="dark"] .modern-card {
+  background: var(--neutral-200);
+  border: 1px solid var(--neutral-400);
+}
+
+:root[data-theme="dark"] .modern-card-header {
+  border-bottom: 1px solid var(--neutral-400);
+}
+
 .modern-card-title {
   font-family: var(--font-family-heading);
   font-size: 1.5rem;
@@ -969,10 +1137,20 @@ body {
   margin: 0;
 }
 
+/* Dark mode enhanced card title styles */
+:root[data-theme="dark"] .modern-card-title {
+  color: var(--neutral-700);
+}
+
 .modern-card-subtitle {
   font-size: 1rem;
   color: var(--neutral-600);
   margin-top: var(--spacing-xs);
+}
+
+/* Dark mode enhanced card subtitle styles */
+:root[data-theme="dark"] .modern-card-subtitle {
+  color: var(--neutral-600);
 }
 
 /* Enhanced stats grid */
@@ -1011,12 +1189,23 @@ body {
   box-shadow: var(--shadow-lg);
 }
 
+/* Dark mode enhanced stat card styles */
+:root[data-theme="dark"] .modern-stat-card {
+  background: linear-gradient(135deg, var(--neutral-200), var(--neutral-300));
+  border: 1px solid var(--neutral-400);
+}
+
 .modern-stat-value {
   font-family: var(--font-family-heading);
   font-size: 1.5rem;
   font-weight: 700;
   color: var(--primary-700);
   margin: 0 0 var(--spacing-xs);
+}
+
+/* Dark mode enhanced stat value styles */
+:root[data-theme="dark"] .modern-stat-value {
+  color: var(--primary-400);
 }
 
 .modern-stat-title {
@@ -1077,6 +1266,12 @@ body {
   box-shadow: var(--shadow-lg);
 }
 
+/* Dark mode enhanced feature card styles */
+:root[data-theme="dark"] .modern-feature-card {
+  background: var(--neutral-200);
+  border: 1px solid var(--neutral-400);
+}
+
 .modern-feature-icon {
   width: 48px;
   height: 48px;
@@ -1091,6 +1286,12 @@ body {
   box-shadow: var(--shadow-sm);
 }
 
+/* Dark mode enhanced feature icon styles */
+:root[data-theme="dark"] .modern-feature-icon {
+  background: linear-gradient(135deg, var(--primary-800) 0%, var(--primary-900) 100%);
+  color: var(--primary-300);
+}
+
 .modern-feature-title {
   font-family: var(--font-family-heading);
   font-size: 0.875rem;
@@ -1099,11 +1300,21 @@ body {
   margin: 0 0 var(--spacing-xs);
 }
 
+/* Dark mode enhanced feature title styles */
+:root[data-theme="dark"] .modern-feature-title {
+  color: var(--neutral-700);
+}
+
 .modern-feature-description {
   color: var(--neutral-600);
   margin: 0 0 var(--spacing-sm);
   font-size: 0.8rem;
   line-height: 1.4;
+}
+
+/* Dark mode enhanced feature description styles */
+:root[data-theme="dark"] .modern-feature-description {
+  color: var(--neutral-600);
 }
 
 /* Enhanced mobile navigation */
@@ -1117,6 +1328,13 @@ body {
   z-index: 1000;
   padding: var(--spacing-sm) 0;
   border-top: 1px solid var(--neutral-200);
+}
+
+/* Dark mode enhanced mobile nav styles */
+:root[data-theme="dark"] .modern-mobile-nav {
+  background: linear-gradient(135deg, var(--neutral-200) 0%, var(--neutral-300) 100%);
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.3);
+  border-top: 1px solid var(--neutral-400);
 }
 
 .modern-mobile-nav-container {
@@ -1183,12 +1401,23 @@ body {
   border-bottom: 1px solid var(--neutral-200);
 }
 
+/* Dark mode enhanced mobile header styles */
+:root[data-theme="dark"] .modern-mobile-header {
+  background: linear-gradient(135deg, var(--neutral-200) 0%, var(--neutral-300) 100%);
+  border-bottom: 1px solid var(--neutral-400);
+}
+
 .modern-header-title {
   font-family: var(--font-family-heading);
   font-size: 1.25rem;
   font-weight: 700;
   color: var(--primary-700);
   margin: 0;
+}
+
+/* Dark mode enhanced header title styles */
+:root[data-theme="dark"] .modern-header-title {
+  color: var(--primary-400);
 }
 
 /* Responsive Design */

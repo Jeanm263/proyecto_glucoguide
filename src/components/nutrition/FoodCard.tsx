@@ -80,15 +80,34 @@ const FoodCardComponent: React.FC<FoodCardProps> = ({ food, onPress }) => {
           outline: none;
         }
 
+        /* Dark mode styles */
+        :root[data-theme="dark"] .food-card {
+          background: var(--neutral-200);
+          border: 1px solid var(--neutral-400);
+          box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+          color: var(--neutral-700);
+        }
+
         .food-card:focus {
           outline: 3px solid #667eea;
           outline-offset: 2px;
           box-shadow: 0 2px 12px rgba(0,0,0,0.08), 0 0 0 3px rgba(102, 126, 234, 0.3);
         }
 
+        /* Dark mode focus styles */
+        :root[data-theme="dark"] .food-card:focus {
+          outline: 3px solid var(--primary-400);
+          box-shadow: 0 2px 12px rgba(0,0,0,0.2), 0 0 0 3px rgba(156, 39, 176, 0.3);
+        }
+
         .food-card:focus-visible {
           outline: 3px solid #667eea;
           outline-offset: 2px;
+        }
+
+        /* Dark mode focus visible styles */
+        :root[data-theme="dark"] .food-card:focus-visible {
+          outline: 3px solid var(--primary-400);
         }
 
         .food-card::before {
@@ -102,10 +121,21 @@ const FoodCardComponent: React.FC<FoodCardProps> = ({ food, onPress }) => {
           transition: height 0.3s ease;
         }
 
+        /* Dark mode before styles */
+        :root[data-theme="dark"] .food-card::before {
+          background: linear-gradient(180deg, var(--primary-400) 0%, var(--primary-600) 100%);
+        }
+
         .food-card:hover {
           transform: translateY(-4px);
           box-shadow: 0 8px 24px rgba(0,0,0,0.12);
           border-color: #667eea;
+        }
+
+        /* Dark mode hover styles */
+        :root[data-theme="dark"] .food-card:hover {
+          box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+          border-color: var(--primary-500);
         }
 
         .food-card:hover::before {
@@ -127,12 +157,22 @@ const FoodCardComponent: React.FC<FoodCardProps> = ({ food, onPress }) => {
           box-shadow: 0 2px 8px rgba(0,0,0,0.15);
         }
 
+        /* Dark mode traffic light styles */
+        :root[data-theme="dark"] .traffic-light-indicator {
+          box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+
         .food-name {
           margin: 0;
           font-size: 20px;
           font-weight: 700;
           color: #333;
           flex: 1;
+        }
+
+        /* Dark mode food name styles */
+        :root[data-theme="dark"] .food-name {
+          color: var(--neutral-700);
         }
 
         .food-category {
@@ -145,11 +185,22 @@ const FoodCardComponent: React.FC<FoodCardProps> = ({ food, onPress }) => {
           text-transform: capitalize;
         }
 
+        /* Dark mode food category styles */
+        :root[data-theme="dark"] .food-category {
+          background: linear-gradient(135deg, var(--neutral-300) 0%, var(--neutral-400) 100%);
+          color: var(--primary-400);
+        }
+
         .food-portion {
           margin: 8px 0;
           font-size: 14px;
           color: #666;
           line-height: 1.5;
+        }
+
+        /* Dark mode food portion styles */
+        :root[data-theme="dark"] .food-portion {
+          color: var(--neutral-600);
         }
 
         .food-stats {
@@ -160,14 +211,29 @@ const FoodCardComponent: React.FC<FoodCardProps> = ({ food, onPress }) => {
           border-top: 1px solid #f0f0f0;
         }
 
+        /* Dark mode food stats styles */
+        :root[data-theme="dark"] .food-stats {
+          border-top: 1px solid var(--neutral-400);
+        }
+
         .stat-item {
           font-size: 13px;
           color: #888;
         }
 
+        /* Dark mode stat item styles */
+        :root[data-theme="dark"] .stat-item {
+          color: var(--neutral-600);
+        }
+
         .stat-item strong {
           color: #667eea;
           font-weight: 600;
+        }
+
+        /* Dark mode stat item strong styles */
+        :root[data-theme="dark"] .stat-item strong {
+          color: var(--primary-500);
         }
       `}</style>
     </div>

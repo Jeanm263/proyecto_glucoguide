@@ -4,7 +4,6 @@ import { Toaster } from "react-hot-toast";
 import App from "./App";
 import "./index.css";
 import { validateEnv } from "./config/env";
-import { AuthProvider } from "./contexts/AuthContext";
 import monitoringService from "./services/monitoringService";
 
 // Validar variables de entorno al iniciar la aplicación
@@ -25,11 +24,18 @@ try {
 // Inicializar servicio de monitoreo
 monitoringService.initialize();
 
+// Agregar un listener para cuando la app se reanuda en entornos web
+const handleVisibilityChange = () => {
+  if (!document.hidden) {
+    console.log('App ha vuelto a estar visible');
+  }
+};
+
+document.addEventListener('visibilitychange', handleVisibilityChange);
+
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <AuthProvider>
-      <App />
-      <Toaster />
-    </AuthProvider>
+    <App />
+    <Toaster />
   </React.StrictMode>
 );

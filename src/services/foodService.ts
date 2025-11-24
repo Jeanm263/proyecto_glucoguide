@@ -3,12 +3,19 @@ import type { FoodItem } from '../types/food';
 
 export const foodService = {
   /**
-   * Obtener todos los alimentos
+   * Obtener todos los alimentos con paginación
    */
-  async getAllFoods(): Promise<FoodItem[]> {
+  async getAllFoods(page: number = 1, limit: number = 70): Promise<{ data: FoodItem[]; total: number; page: number; pages: number }> {
     try {
-      const response = await apiClient.get('/foods');
-      return response.data.data || response.data;
+      const response = await apiClient.get('/foods', {
+        params: { page, limit }
+      });
+      return {
+        data: response.data.data || response.data,
+        total: response.data.total || 0,
+        page: response.data.page || 1,
+        pages: response.data.pages || 1
+      };
     } catch (error) {
       console.error('Error fetching foods:', error);
       throw error;
@@ -16,16 +23,21 @@ export const foodService = {
   },
 
   /**
-   * Buscar alimentos por nombre o categoría
+   * Buscar alimentos por nombre o categoría con paginación
    */
-  async searchFoods(query?: string, category?: string): Promise<FoodItem[]> {
+  async searchFoods(query?: string, category?: string, page: number = 1, limit: number = 70): Promise<{ data: FoodItem[]; total: number; page: number; pages: number }> {
     try {
-      const params: Record<string, string> = {};
+      const params: Record<string, string | number> = { page, limit };
       if (query) params.query = query;
-      if (category) params.category = category;
+      if (category && category !== 'todas') params.category = category;
       
       const response = await apiClient.get('/foods/search', { params });
-      return response.data.data || response.data;
+      return {
+        data: response.data.data || response.data,
+        total: response.data.total || 0,
+        page: response.data.page || 1,
+        pages: response.data.pages || 1
+      };
     } catch (error) {
       console.error('Error searching foods:', error);
       throw error;

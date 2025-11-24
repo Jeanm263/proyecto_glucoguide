@@ -11,7 +11,7 @@ const apiClient = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 30000, // Aumentado de 10000 a 30000 ms (30 segundos)
+  timeout: 60000, // Aumentado a 60 segundos para conexiones móviles
   withCredentials: true, // Importante para manejar cookies
 });
 
@@ -85,4 +85,3 @@ apiClient.interceptors.response.use(
 );
 
 export default apiClient;
-
